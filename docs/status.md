@@ -43,9 +43,18 @@
 - Created the `EmployeeDrilldown` profile panel showing personal workload stats and top candidate repetitive tasks.
 - Extracted and stored initial unfiltered dashboard stats as baseline benchmarks for rendering department-wise peer comparisons.
 - Rearranged dashboard grid layouts for better visual mapping of profile benchmarking next to the activity breakdowns.
+- [x] Step 5: Grounded Conversational AI Assistant (Postgres & Aggregates RAG)
+- [x] Step 5: Multi-turn session memory for filters context tracking
+- [x] Step 5: Strict numeric citations mapping logic
+- [x] Step 5: Assistant chat interface panel on dashboard UI
+
+- Created `backend/app/services/assistant_tools.py` wrapping aggregates and employee details for LLM tool contexts.
+- Built `POST /api/chat` route in `backend/app/api/routes/chat.py` with strict system prompt configuration and in-memory multi-turn filters mapping.
+- Integrated the AI Assistant chatbot interface panel in `frontend/components/dashboard/AssistantPanel.tsx` with source citation pill parsing.
+- Wrote full test harness covering regex query parsers, tool wrapper functions, and chat API JSON responses.
 
 ## Next immediate task
-- Step 5: AI Assistant, chat capabilities, and reporting exports.
+- Step 6: Production deployment verification and multi-tenant scaling prep.
 
 ## Blocked on manual setup
 - (None)

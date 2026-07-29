@@ -11,6 +11,7 @@ import WeeklyTrend from '@/components/dashboard/WeeklyTrend';
 import AnomalyCallouts from '@/components/dashboard/AnomalyCallouts';
 import LoadingSkeleton from '@/components/dashboard/LoadingSkeleton';
 import EmployeeDrilldown from '@/components/drilldown/EmployeeDrilldown';
+import AssistantPanel from '@/components/dashboard/AssistantPanel';
 import { AlertCircle, Terminal } from 'lucide-react';
 
 function DashboardContent() {
@@ -79,9 +80,14 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* 6. Activity Flags */}
-          <div className="grid grid-cols-1 gap-6">
-            <AnomalyCallouts />
+          {/* 6. Activity Flags & Grounded AI Assistant */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3">
+              <AnomalyCallouts />
+            </div>
+            <div className="lg:col-span-2">
+              <AssistantPanel />
+            </div>
           </div>
         </>
       )}
