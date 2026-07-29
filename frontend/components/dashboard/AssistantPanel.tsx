@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, User, Send, RefreshCw, AlertCircle, Quote, X, Minimize2, MessageSquare } from 'lucide-react';
+import { Bot, User, Send, RefreshCw, AlertCircle, Quote, Minimize2 } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -129,10 +129,10 @@ export default function AssistantPanel() {
       parts.push(
         <span 
           key={match.index} 
-          className="inline-flex items-center bg-blue-50/90 hover:bg-blue-100/80 border border-blue-200/70 text-blue-700 font-extrabold text-[9px] px-1.5 py-0.5 rounded-md select-none ml-1 cursor-help tracking-wide"
+          className="inline-flex items-center bg-blue-50/90 hover:bg-blue-100/80 border border-blue-200/70 text-blue-700 font-extrabold text-[9px] px-1.5 py-0.5 rounded-md select-none ml-1 cursor-help tracking-wide break-all"
           title={`Data verified from: ${sourceText}`}
         >
-          <Quote className="h-2 w-2 mr-0.5 text-blue-500" />
+          <Quote className="h-2 w-2 mr-0.5 text-blue-500 shrink-0" />
           {sourceText}
         </span>
       );
@@ -153,32 +153,32 @@ export default function AssistantPanel() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center space-x-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group border border-blue-500"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center space-x-2 sm:space-x-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 border border-blue-500 max-w-[calc(100vw-32px)]"
       >
-        <div className="bg-white/20 p-1.5 rounded-xl">
+        <div className="bg-white/20 p-1.5 rounded-xl shrink-0">
           <Bot className="h-4 w-4 text-white" />
         </div>
-        <span>Pulse AI Copilot</span>
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="truncate">Pulse AI Copilot</span>
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[360px] sm:w-[400px] h-[480px] rounded-2xl border border-slate-200/90 bg-white shadow-2xl transition-all duration-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+    <div className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:right-6 sm:bottom-6 z-50 w-auto sm:w-[400px] h-[460px] sm:h-[480px] max-h-[85vh] rounded-2xl border border-slate-200/90 bg-white shadow-2xl transition-all duration-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
       {/* Panel Header */}
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
-        <div className="flex items-center space-x-2.5">
-          <div className="bg-blue-600 p-1.5 rounded-xl text-white shadow-xs">
+      <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+        <div className="flex items-center space-x-2.5 min-w-0 pr-2">
+          <div className="bg-blue-600 p-1.5 rounded-xl text-white shadow-xs shrink-0">
             <Bot className="h-4 w-4" />
           </div>
-          <div>
-            <h3 className="font-bold text-slate-900 text-sm">Pulse AI Copilot</h3>
-            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Operational Copilot</p>
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 text-sm truncate">Pulse AI Copilot</h3>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider truncate">Operational Copilot</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 shrink-0">
           <button
             onClick={handleClearHistory}
             disabled={loading}
@@ -198,7 +198,7 @@ export default function AssistantPanel() {
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/30">
+      <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3.5 bg-slate-50/30">
         {messages.map((msg) => {
           const isBot = msg.role === 'assistant';
           return (
@@ -216,7 +216,7 @@ export default function AssistantPanel() {
               </div>
 
               {/* Message Bubble */}
-              <div className={`p-3 rounded-2xl max-w-[88%] text-xs leading-relaxed font-semibold border shadow-2xs ${
+              <div className={`p-3 sm:p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed font-semibold border shadow-2xs break-words ${
                 isBot 
                   ? 'bg-white border-slate-200/90 text-slate-750' 
                   : 'bg-blue-600 border-blue-700 text-white'
@@ -234,7 +234,7 @@ export default function AssistantPanel() {
               <Bot className="h-4 w-4" />
             </div>
             <div className="p-3 bg-white border border-slate-200/90 rounded-2xl flex items-center space-x-2 shadow-2xs text-xs font-semibold text-slate-400">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-500" />
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-500 shrink-0" />
               <span>Querying database aggregates...</span>
             </div>
           </div>
@@ -244,9 +244,9 @@ export default function AssistantPanel() {
         {error && (
           <div className="p-3 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-start space-x-2.5 text-xs text-rose-800 font-semibold shadow-2xs">
             <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <p>Failed to query assistant endpoint.</p>
-              <p className="text-[10px] text-rose-500 font-semibold">{error}</p>
+              <p className="text-[10px] text-rose-500 font-semibold truncate">{error}</p>
             </div>
           </div>
         )}
@@ -262,7 +262,7 @@ export default function AssistantPanel() {
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Ask Pulse Copilot..."
           disabled={loading}
-          className="flex-1 bg-slate-50/80 border border-slate-200/90 focus:border-blue-500 rounded-xl px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+          className="flex-1 min-w-0 bg-slate-50/80 border border-slate-200/90 focus:border-blue-500 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
         />
         <button
           type="submit"
