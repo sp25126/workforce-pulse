@@ -3,7 +3,7 @@
 import React from 'react';
 import { useDashboard } from './DashboardContext';
 import { formatHours, formatCurrency } from '@/lib/formatters';
-import { CalendarRange } from 'lucide-react';
+import { CalendarRange, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 export default function WeeklyTrend() {
   const { data } = useDashboard();
@@ -14,15 +14,29 @@ export default function WeeklyTrend() {
   if (weekly_trend.length === 0) {
     return (
       <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 flex flex-col h-full items-center justify-center min-h-[260px]">
-        <p className="text-slate-400 text-sm font-medium">No trend data available.</p>
+        <p className="text-slate-400 text-sm font-semibold">No weekly trend data available.</p>
       </div>
     );
   }
 
+  // 1. Calculate four-week movement
+  const firstWeek = weekly_trend[0];
+  const lastWeek = weekly_trend[weekly_trend.length - 1];
+  
+  const firstShare = firstWeek.total_hours > 0 ? (firstWeek.hours_recoverable / firstWeek.total_hours) * 100 : 0;
+  const lastShare = lastWeek.total_hours > 0 ? (lastWeek.hours_recoverable / lastWeek.total_hours) * 100 : 0;
+  const shareDelta = lastShare - firstShare;
+  
+  const totalDeltaHours = lastWeek.total_hours - firstWeek.total_hours;
+
+  const trendNarrative = weekly_trend.length >= 2 
+    ? `${shareDelta >= 0 ? 'Increase' : 'Reduction'} of ${Math.abs(shareDelta).toFixed(1)}% in repetitive task share over the last ${weekly_trend.length} weeks.`
+    : "Baseline trend data loaded.";
+
   // SVG Chart Config
   const height = 180;
   const width = 500;
-  const paddingLeft = 35;
+  const paddingLeft = 40;
   const paddingBottom = 25;
   const paddingTop = 15;
   const paddingRight = 10;
@@ -34,29 +48,42 @@ export default function WeeklyTrend() {
   const yTicks = [0, maxHours / 2, maxHours];
 
   const colWidth = graphWidth / weekly_trend.length;
-  const barWidth = Math.min(colWidth * 0.5, 30);
+  const barWidth = Math.min(colWidth * 0.4, 24);
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="font-bold text-slate-800 text-lg flex items-center space-x-2">
-          <CalendarRange className="h-5 w-5 text-blue-500" />
-          <span>Weekly Activity Trend</span>
-        </h3>
+      {/* Chart Header */}
+      <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="space-y-0.5">
+          <h3 className="font-bold text-slate-800 text-lg flex items-center space-x-2">
+            <CalendarRange className="h-5 w-5 text-blue-500" />
+            <span>Weekly Activity & Waste Trend</span>
+          </h3>
+          <p className="text-xs font-semibold text-slate-500 flex items-center">
+            {shareDelta >= 0 ? (
+              <ArrowUpRight className="h-3.5 w-3.5 text-amber-500 mr-0.5 shrink-0" />
+            ) : (
+              <ArrowDownRight className="h-3.5 w-3.5 text-emerald-500 mr-0.5 shrink-0" />
+            )}
+            <span>{trendNarrative}</span>
+          </p>
+        </div>
+
+        {/* Legend */}
         <div className="flex items-center space-x-3 text-xs font-semibold text-slate-500">
           <div className="flex items-center space-x-1">
             <div className="h-2.5 w-2.5 rounded bg-blue-500"></div>
-            <span>Total Hours</span>
+            <span>Total Time</span>
           </div>
           <div className="flex items-center space-x-1">
             <div className="h-2.5 w-2.5 rounded bg-amber-400"></div>
-            <span>Recoverable</span>
+            <span>Repetitive (Waste)</span>
           </div>
         </div>
       </div>
 
+      {/* SVG Container */}
       <div className="p-6 flex-1 flex flex-col justify-center">
-        {/* Responsive SVG wrapper */}
         <div className="w-full overflow-x-auto">
           <svg 
             viewBox={`0 0 ${width} ${height}`} 
@@ -79,7 +106,7 @@ export default function WeeklyTrend() {
                     x={paddingLeft - 8} 
                     y={y + 4} 
                     textAnchor="end" 
-                    className="fill-slate-400 font-semibold text-[10px]"
+                    className="fill-slate-400 font-bold text-[10px]"
                   >
                     {Math.round(tick)}h
                   </text>
@@ -102,7 +129,6 @@ export default function WeeklyTrend() {
               let displayDate = item.week_start;
               try {
                 const date = new Date(item.week_start);
-                // e.g. "Oct 06"
                 displayDate = date.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
               } catch {}
 
@@ -129,9 +155,9 @@ export default function WeeklyTrend() {
                     />
                   )}
 
-                  {/* Tooltip text (invisible on default, show on hover) */}
+                  {/* Tooltip text */}
                   <title>
-                    {`Week of ${item.week_start}\nTotal: ${formatHours(item.total_hours)}\nRecoverable: ${formatHours(item.hours_recoverable)} (${formatCurrency(item.inr_recoverable)})`}
+                    {`Week of ${item.week_start}\nTotal Time: ${formatHours(item.total_hours)}\nWaste/Repetitive: ${formatHours(item.hours_recoverable)} (${formatCurrency(item.inr_recoverable)})`}
                   </title>
 
                   {/* X-axis date labels */}
@@ -139,7 +165,7 @@ export default function WeeklyTrend() {
                     x={xCenter} 
                     y={height - 8} 
                     textAnchor="middle" 
-                    className="fill-slate-500 font-semibold text-[10px]"
+                    className="fill-slate-500 font-bold text-[10px]"
                   >
                     {displayDate}
                   </text>
