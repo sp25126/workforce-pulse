@@ -13,7 +13,7 @@ export default function WeeklyTrend() {
 
   if (weekly_trend.length === 0) {
     return (
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 flex flex-col h-full items-center justify-center min-h-[260px]">
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm p-6 flex flex-col h-full items-center justify-center min-h-[260px]">
         <p className="text-slate-400 text-sm font-semibold">No weekly trend data available.</p>
       </div>
     );
@@ -26,8 +26,6 @@ export default function WeeklyTrend() {
   const firstShare = firstWeek.total_hours > 0 ? (firstWeek.hours_recoverable / firstWeek.total_hours) * 100 : 0;
   const lastShare = lastWeek.total_hours > 0 ? (lastWeek.hours_recoverable / lastWeek.total_hours) * 100 : 0;
   const shareDelta = lastShare - firstShare;
-  
-  const totalDeltaHours = lastWeek.total_hours - firstWeek.total_hours;
 
   const trendNarrative = weekly_trend.length >= 2 
     ? `${shareDelta >= 0 ? 'Increase' : 'Reduction'} of ${Math.abs(shareDelta).toFixed(1)}% in repetitive task share over the last ${weekly_trend.length} weeks.`
@@ -36,7 +34,7 @@ export default function WeeklyTrend() {
   // SVG Chart Config
   const height = 180;
   const width = 500;
-  const paddingLeft = 40;
+  const paddingLeft = 45;
   const paddingBottom = 25;
   const paddingTop = 15;
   const paddingRight = 10;
@@ -48,12 +46,12 @@ export default function WeeklyTrend() {
   const yTicks = [0, maxHours / 2, maxHours];
 
   const colWidth = graphWidth / weekly_trend.length;
-  const barWidth = Math.min(colWidth * 0.4, 24);
+  const barWidth = Math.min(colWidth * 0.35, 20);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full">
+    <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col h-full overflow-hidden">
       {/* Chart Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="px-6 py-4.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/20">
         <div className="space-y-0.5">
           <h3 className="font-bold text-slate-800 text-lg flex items-center space-x-2">
             <CalendarRange className="h-5 w-5 text-blue-500" />
@@ -70,13 +68,13 @@ export default function WeeklyTrend() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center space-x-3 text-xs font-semibold text-slate-500">
-          <div className="flex items-center space-x-1">
-            <div className="h-2.5 w-2.5 rounded bg-blue-500"></div>
+        <div className="flex items-center space-x-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex items-center space-x-1.5">
+            <div className="h-2.5 w-2.5 rounded bg-blue-500 shadow-sm"></div>
             <span>Total Time</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="h-2.5 w-2.5 rounded bg-amber-400"></div>
+          <div className="flex items-center space-x-1.5">
+            <div className="h-2.5 w-2.5 rounded bg-amber-400 shadow-sm"></div>
             <span>Repetitive (Waste)</span>
           </div>
         </div>
@@ -104,11 +102,11 @@ export default function WeeklyTrend() {
                   />
                   <text 
                     x={paddingLeft - 8} 
-                    y={y + 4} 
+                    y={y + 3.5} 
                     textAnchor="end" 
-                    className="fill-slate-400 font-bold text-[10px]"
+                    className="fill-slate-400 font-bold text-[9px] tracking-wide"
                   >
-                    {Math.round(tick)}h
+                    {Math.round(tick)} hrs
                   </text>
                 </g>
               );
@@ -141,7 +139,7 @@ export default function WeeklyTrend() {
                     width={barWidth} 
                     height={totalBarHeight} 
                     rx="3" 
-                    className="fill-blue-500/80 group-hover:fill-blue-500 transition-all"
+                    className="fill-blue-500/80 group-hover:fill-blue-500 transition-all duration-300"
                   />
                   {/* Recoverable Hours Bar (Stacked Overlay) */}
                   {repBarHeight > 0 && (
@@ -151,7 +149,7 @@ export default function WeeklyTrend() {
                       width={barWidth} 
                       height={repBarHeight} 
                       rx="3" 
-                      className="fill-amber-400 group-hover:fill-amber-500 transition-all"
+                      className="fill-amber-400 group-hover:fill-amber-500 transition-all duration-300"
                     />
                   )}
 
@@ -165,7 +163,7 @@ export default function WeeklyTrend() {
                     x={xCenter} 
                     y={height - 8} 
                     textAnchor="middle" 
-                    className="fill-slate-500 font-bold text-[10px]"
+                    className="fill-slate-500 font-bold text-[9px] uppercase tracking-wide"
                   >
                     {displayDate}
                   </text>

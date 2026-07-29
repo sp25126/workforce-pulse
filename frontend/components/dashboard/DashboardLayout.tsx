@@ -20,47 +20,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-800">
+    <div className="flex min-h-screen bg-slate-50/50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-800">
       {/* 1. Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200 shadow-sm z-20">
+      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200/80 shadow-sm z-20">
         {/* Sidebar Header Logo */}
-        <div className="flex items-center space-x-3 px-6 py-5 border-b border-slate-100 shrink-0">
-          <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+        <div className="flex items-center space-x-3 px-6 py-5.5 border-b border-slate-100 shrink-0">
+          <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm shadow-blue-500/20">
             <Activity className="h-5 w-5" />
           </div>
-          <span className="font-bold text-lg tracking-tight text-slate-800">Workforce Pulse</span>
+          <span className="font-extrabold text-base tracking-tight text-slate-800">Workforce Pulse</span>
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {navigation.map((item, index) => {
             const Icon = item.icon;
             return (
               <a
                 key={index}
                 href="#"
-                className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                   item.active 
-                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                    ? 'bg-blue-50/80 text-blue-700 shadow-sm border border-blue-100/50' 
+                    : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.name}</span>
               </a>
             );
           })}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 shrink-0">
-          <div className="flex items-center space-x-3 px-2 py-1">
-            <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">
+        {/* Sidebar Footer Profile widget */}
+        <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/20">
+          <div className="flex items-center space-x-3 px-2 py-1.5">
+            <div className="h-8.5 w-8.5 rounded-xl bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200/60 flex items-center justify-center font-bold text-xs text-slate-600 shadow-inner">
               AD
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-800">Audit Admin</p>
-              <p className="text-[10px] text-slate-400 font-semibold">Pulse reporting</p>
+            <div className="overflow-hidden">
+              <p className="text-xs font-bold text-slate-800 truncate">Audit Admin</p>
+              <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider truncate">Pulse reporting</p>
             </div>
           </div>
         </div>
@@ -68,47 +68,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* 2. Mobile Nav Header Bar */}
       <div className="flex-1 flex flex-col md:pl-64">
-        <header className="sticky top-0 z-20 md:hidden bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <header className="sticky top-0 z-20 md:hidden bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
-            <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+            <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm">
               <Activity className="h-4 w-4" />
             </div>
-            <span className="font-bold tracking-tight text-slate-800">Workforce Pulse</span>
+            <span className="font-extrabold tracking-tight text-slate-800 text-sm">Workforce Pulse</span>
           </div>
           <button 
             onClick={() => setMobileMenuOpen(true)}
-            className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors duration-200 cursor-pointer"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           </button>
         </header>
 
-        {/* 3. Mobile Navigation Drawer (Overlay) */}
+        {/* 3. Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-30 md:hidden flex">
             {/* Backdrop */}
             <div 
-              className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
               onClick={() => setMobileMenuOpen(false)}
             />
             {/* Drawer container */}
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-slate-200 shadow-xl h-full animate-slide-in">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-slate-200 shadow-2xl h-full animate-in slide-in-from-left duration-200">
               <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+                  <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm">
                     <Activity className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-slate-800">Workforce Pulse</span>
+                  <span className="font-extrabold text-slate-800">Workforce Pulse</span>
                 </div>
                 <button 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
+                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+              <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
                 {navigation.map((item, index) => {
                   const Icon = item.icon;
                   return (
@@ -116,27 +116,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       key={index}
                       href="#"
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                      className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                         item.active 
-                          ? 'bg-blue-50 text-blue-700 shadow-sm' 
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                          ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/50' 
+                          : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
                       }`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       <span>{item.name}</span>
                     </a>
                   );
                 })}
               </nav>
 
-              <div className="p-4 border-t border-slate-100 shrink-0">
-                <div className="flex items-center space-x-3 px-2 py-1">
-                  <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">
+              <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/20">
+                <div className="flex items-center space-x-3 px-2 py-1.5">
+                  <div className="h-8.5 w-8.5 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center font-bold text-xs text-slate-600">
                     AD
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-800">Audit Admin</p>
-                    <p className="text-[10px] text-slate-400 font-semibold">Pulse reporting</p>
+                    <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Pulse reporting</p>
                   </div>
                 </div>
               </div>
@@ -145,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
 
         {/* 4. Page Main Content Container */}
-        <main className="flex-1 p-6 sm:p-8 md:p-10 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-6 sm:p-8 lg:p-10 max-w-7xl w-full mx-auto space-y-6">
           {children}
         </main>
       </div>

@@ -33,45 +33,45 @@ export default function TimeSinkBreakdown() {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full">
+    <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col h-full overflow-hidden">
       {/* Header and tab buttons */}
-      <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="px-6 py-4.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/20">
         <h3 className="font-bold text-slate-800 text-lg flex items-center space-x-2">
           <BarChart3 className="h-5 w-5 text-blue-500" />
           <span>Work Activity Breakdown</span>
         </h3>
         
         {/* Tabs switcher */}
-        <div className="bg-slate-100 p-0.5 rounded-lg flex self-start sm:self-auto">
+        <div className="bg-slate-100/80 p-1 rounded-xl flex self-start sm:self-auto border border-slate-200/40">
           <button
             onClick={() => setActiveTab('tasks')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${activeTab === 'tasks' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${activeTab === 'tasks' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/20' : 'text-slate-500 hover:text-slate-800'}`}
           >
             <BarChart3 className="h-3.5 w-3.5" />
-            <span>Task Categories</span>
+            <span>Tasks</span>
           </button>
           <button
             onClick={() => setActiveTab('apps')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${activeTab === 'apps' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${activeTab === 'apps' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/20' : 'text-slate-500 hover:text-slate-800'}`}
           >
             <AppWindow className="h-3.5 w-3.5" />
-            <span>Apps Used</span>
+            <span>Apps</span>
           </button>
           <button
             onClick={() => setActiveTab('depts')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${activeTab === 'depts' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${activeTab === 'depts' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/20' : 'text-slate-500 hover:text-slate-800'}`}
           >
             <Building className="h-3.5 w-3.5" />
-            <span>Departments</span>
+            <span>Depts</span>
           </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-6 flex-1 overflow-y-auto max-h-[360px]">
+      <div className="p-6 flex-1 overflow-y-auto max-h-[380px] space-y-2">
         {/* Tasks Tab */}
         {activeTab === 'tasks' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {by_task_category.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-10 font-medium">No task category data found matching filter.</p>
             ) : (
@@ -84,36 +84,36 @@ export default function TimeSinkBreakdown() {
                   <div 
                     key={idx} 
                     onClick={() => handleTaskClick(item.task_category)}
-                    className={`space-y-1.5 p-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-all border ${
-                      isSelected ? 'bg-blue-50/50 border-blue-200 hover:bg-blue-50' : 'border-transparent'
+                    className={`space-y-2 p-2.5 rounded-xl cursor-pointer hover:bg-slate-50 transition-all duration-200 border ${
+                      isSelected ? 'bg-blue-50/40 border-blue-200 hover:bg-blue-50 shadow-sm' : 'border-transparent'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-sm font-semibold">
+                    <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-slate-700 flex items-center space-x-1.5">
-                        {isSelected && <Check className="h-4 w-4 text-blue-600" />}
-                        <span>{item.task_category}</span>
+                        {isSelected && <Check className="h-3.5 w-3.5 text-blue-600" />}
+                        <span className="font-semibold text-sm text-slate-750">{item.task_category}</span>
                       </span>
-                      <span className="text-slate-500">
+                      <span className="text-slate-500 font-semibold">
                         {formatHours(item.total_hours)} 
                         {item.hours_recoverable > 0 && (
-                          <span className="text-xs text-amber-500 ml-1">
-                            ({formatHours(item.hours_recoverable)} recoverable)
+                          <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-1.5 py-0.5 ml-2 font-bold">
+                            {formatHours(item.hours_recoverable)} rec.
                           </span>
                         )}
                       </span>
                     </div>
                     {/* Visual Stacked bar */}
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex w-full">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden flex w-full">
                       {/* Repetitive/Recoverable part */}
                       {item.hours_recoverable > 0 && (
                         <div 
-                          className="bg-amber-400 h-full transition-all" 
+                          className="bg-amber-400 h-full transition-all duration-500 rounded-l-full" 
                           style={{ width: `${widthPercent * (repPercent / 100)}%` }}
                         />
                       )}
                       {/* Non-repetitive part */}
                       <div 
-                        className="bg-blue-500 h-full transition-all" 
+                        className={`bg-blue-500 h-full transition-all duration-500 ${item.hours_recoverable === 0 ? 'rounded-full' : 'rounded-r-full'}`} 
                         style={{ width: `${widthPercent * ((100 - repPercent) / 100)}%` }}
                       />
                     </div>
@@ -126,21 +126,21 @@ export default function TimeSinkBreakdown() {
 
         {/* Apps Tab */}
         {activeTab === 'apps' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {by_app.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-10 font-medium">No application data found matching filter.</p>
             ) : (
               by_app.map((item, idx) => {
                 const widthPercent = (item.total_hours / maxAppHours) * 100;
                 return (
-                  <div key={idx} className="space-y-1.5 p-2 border border-transparent rounded-lg">
-                    <div className="flex items-center justify-between text-sm font-semibold">
-                      <span className="text-slate-700">{item.app_used}</span>
-                      <span className="text-slate-500">{formatHours(item.total_hours)}</span>
+                  <div key={idx} className="space-y-2 p-2.5 border border-transparent rounded-xl hover:bg-slate-50 transition-all duration-200">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-slate-750 font-semibold text-sm">{item.app_used}</span>
+                      <span className="text-slate-500 font-semibold">{formatHours(item.total_hours)}</span>
                     </div>
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden w-full">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden w-full">
                       <div 
-                        className="bg-slate-400 h-full rounded-full transition-all" 
+                        className="bg-slate-400 h-full rounded-full transition-all duration-500" 
                         style={{ width: `${widthPercent}%` }}
                       />
                     </div>
@@ -153,7 +153,7 @@ export default function TimeSinkBreakdown() {
 
         {/* Departments Tab */}
         {activeTab === 'depts' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {by_department.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-10 font-medium">No department data found matching filter.</p>
             ) : (
@@ -165,20 +165,20 @@ export default function TimeSinkBreakdown() {
                   <div 
                     key={idx} 
                     onClick={() => handleDeptClick(item.department)}
-                    className={`space-y-1.5 p-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-all border ${
-                      isSelected ? 'bg-purple-50/50 border-purple-200 hover:bg-purple-50' : 'border-transparent'
+                    className={`space-y-2 p-2.5 rounded-xl cursor-pointer hover:bg-slate-50 transition-all duration-200 border ${
+                      isSelected ? 'bg-purple-50/40 border-purple-200 hover:bg-purple-50 shadow-sm' : 'border-transparent'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-sm font-semibold">
+                    <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-slate-700 flex items-center space-x-1.5">
-                        {isSelected && <Check className="h-4 w-4 text-purple-600" />}
-                        <span>{item.department}</span>
+                        {isSelected && <Check className="h-3.5 w-3.5 text-purple-600" />}
+                        <span className="font-semibold text-sm text-slate-750">{item.department}</span>
                       </span>
-                      <span className="text-slate-500">{formatHours(item.total_hours)}</span>
+                      <span className="text-slate-500 font-semibold">{formatHours(item.total_hours)}</span>
                     </div>
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden w-full">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden w-full">
                       <div 
-                        className={`h-full rounded-full transition-all ${
+                        className={`h-full rounded-full transition-all duration-500 ${
                           isSelected ? 'bg-purple-600' : 'bg-purple-500'
                         }`} 
                         style={{ width: `${widthPercent}%` }}
@@ -194,14 +194,14 @@ export default function TimeSinkBreakdown() {
       
       {/* Legend footer */}
       {activeTab === 'tasks' && by_task_category.length > 0 && (
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 rounded-b-lg flex items-center space-x-4 text-xs font-semibold text-slate-500">
+        <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-100 rounded-b-xl flex items-center space-x-5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
           <div className="flex items-center space-x-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-blue-500"></div>
+            <div className="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-sm"></div>
             <span>Standard Workflow</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-400"></div>
-            <span>Repetitive Task (Recoverable)</span>
+            <div className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-sm"></div>
+            <span>Repetitive Task</span>
           </div>
         </div>
       )}
