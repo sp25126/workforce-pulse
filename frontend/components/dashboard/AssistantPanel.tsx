@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, User, Send, RefreshCw, AlertCircle, Quote } from 'lucide-react';
+import { Bot, User, Send, RefreshCw, AlertCircle, Quote, X, Minimize2, MessageSquare } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -15,6 +15,7 @@ export default function AssistantPanel() {
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -32,15 +33,17 @@ export default function AssistantPanel() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Hello! I am your Workforce Pulse assistant. I can query operational time tracking aggregates, employee detail lists, weekly trends, and data quality anomalies directly. Ask me anything about the audit data!'
+        content: 'Hello! I am Pulse AI Copilot. I can query operational time tracking aggregates, employee detail lists, weekly trends, and data quality anomalies directly. Ask me anything about the audit data!'
       }
     ]);
   }, []);
 
   // Scroll chat history to bottom
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+    if (isOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, loading, isOpen]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,30 +148,57 @@ export default function AssistantPanel() {
     return parts.length > 0 ? parts : content;
   };
 
+  // Minimized Trigger Button
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-50 flex items-center space-x-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200 cursor-pointer active:scale-95 group border border-blue-500"
+      >
+        <div className="bg-white/20 p-1.5 rounded-xl">
+          <Bot className="h-4 w-4 text-white" />
+        </div>
+        <span>Pulse AI Copilot</span>
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+      </button>
+    );
+  }
+
   return (
-    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-[420px] overflow-hidden">
+    <div className="fixed bottom-6 right-6 z-50 w-[360px] sm:w-[400px] h-[480px] rounded-2xl border border-slate-200/90 bg-white shadow-2xl transition-all duration-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
       {/* Panel Header */}
-      <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 shrink-0">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
         <div className="flex items-center space-x-2.5">
-          <div className="bg-blue-50 border border-blue-150 p-2 rounded-xl text-blue-600">
-            <Bot className="h-4.5 w-4.5" />
+          <div className="bg-blue-600 p-1.5 rounded-xl text-white shadow-xs">
+            <Bot className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-900 text-sm">Grounded AI Assistant</h3>
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Operational copilot</p>
+            <h3 className="font-bold text-slate-900 text-sm">Pulse AI Copilot</h3>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Operational Copilot</p>
           </div>
         </div>
-        <button
-          onClick={handleClearHistory}
-          disabled={loading}
-          className="text-[10px] font-extrabold text-rose-600 bg-rose-50 hover:bg-rose-100/80 border border-rose-200/50 px-2.5 py-1 rounded-lg transition-all cursor-pointer disabled:opacity-50"
-        >
-          Reset Session
-        </button>
+
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={handleClearHistory}
+            disabled={loading}
+            className="text-[9px] font-extrabold text-slate-500 hover:text-slate-700 hover:bg-slate-100/80 px-2 py-1 rounded-lg transition-all cursor-pointer disabled:opacity-50"
+            title="Reset Chat Session"
+          >
+            Reset
+          </button>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-all cursor-pointer"
+            title="Minimize"
+          >
+            <Minimize2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-slate-50/30">
+      <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/30">
         {messages.map((msg) => {
           const isBot = msg.role === 'assistant';
           return (
@@ -186,7 +216,7 @@ export default function AssistantPanel() {
               </div>
 
               {/* Message Bubble */}
-              <div className={`p-3.5 rounded-2xl max-w-[88%] text-xs leading-relaxed font-semibold border shadow-2xs ${
+              <div className={`p-3 rounded-2xl max-w-[88%] text-xs leading-relaxed font-semibold border shadow-2xs ${
                 isBot 
                   ? 'bg-white border-slate-200/90 text-slate-750' 
                   : 'bg-blue-600 border-blue-700 text-white'
@@ -203,7 +233,7 @@ export default function AssistantPanel() {
             <div className="h-7 w-7 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shrink-0">
               <Bot className="h-4 w-4" />
             </div>
-            <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl flex items-center space-x-2 shadow-2xs text-xs font-semibold text-slate-400">
+            <div className="p-3 bg-white border border-slate-200/90 rounded-2xl flex items-center space-x-2 shadow-2xs text-xs font-semibold text-slate-400">
               <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-500" />
               <span>Querying database aggregates...</span>
             </div>
@@ -225,12 +255,12 @@ export default function AssistantPanel() {
       </div>
 
       {/* Input controls footer */}
-      <form onSubmit={handleSend} className="p-3.5 border-t border-slate-100 bg-white flex items-center space-x-2 shrink-0">
+      <form onSubmit={handleSend} className="p-3 border-t border-slate-100 bg-white flex items-center space-x-2 shrink-0">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Ask a question (e.g. Who spent most time in Finance?)"
+          placeholder="Ask Pulse Copilot..."
           disabled={loading}
           className="flex-1 bg-slate-50/80 border border-slate-200/90 focus:border-blue-500 rounded-xl px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
         />

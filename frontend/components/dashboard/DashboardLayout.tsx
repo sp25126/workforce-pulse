@@ -21,8 +21,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen bg-slate-50/60 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-800">
-      {/* 1. Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200/80 shadow-xs z-20">
+      {/* 1. Desktop Sidebar - Anchored strictly to top-0 left-0 bottom-0 */}
+      <aside className="hidden md:flex md:w-64 md:flex-col fixed top-0 left-0 bottom-0 bg-white border-r border-slate-200/80 shadow-xs z-20">
         {/* Sidebar Header Logo */}
         <div className="flex items-center space-x-3 px-6 py-5 border-b border-slate-100 shrink-0">
           <div className="bg-blue-600 p-2 rounded-xl text-white shadow-sm shadow-blue-500/20">

@@ -93,18 +93,16 @@ function DashboardContent() {
             </div>
           </section>
 
-          {/* 6. Activity Flags & Grounded AI Assistant */}
+          {/* 6. Activity Quality Flags Audit */}
           <section className="space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Data Quality Audit & Intelligence</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              <div className="lg:col-span-3">
-                <AnomalyCallouts />
-              </div>
-              <div className="lg:col-span-2">
-                <AssistantPanel />
-              </div>
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Data Quality & Operational Audit</h2>
+            <div className="w-full">
+              <AnomalyCallouts />
             </div>
           </section>
+
+          {/* Floating Pulse AI Copilot Floating Assistant */}
+          <AssistantPanel />
 
           {/* Hidden Executive Summary Export Target */}
           <ExecutiveSummary />
