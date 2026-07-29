@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     # Supabase Connection URL
     DATABASE_URL: str = "postgresql://postgres:Saumya84888@db.jtrissjdliytrnvevtjj.supabase.co:5432/postgres"
     
-    # OpenRouter API configs
-    OPENROUTER_API_KEY: str = ""
-    OPENROUTER_MODEL: str = "google/gemma-4-31b-it:free"
+    # Groq API configs
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 

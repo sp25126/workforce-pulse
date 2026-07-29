@@ -121,7 +121,7 @@ async def chat_endpoint(request: ChatRequest):
     # Format structured context as JSON block
     context_str = json.dumps(database_context, indent=2)
     
-    # strict system prompt
+    # Strict system prompt
     system_prompt = (
         "You are Workforce Pulse, a workforce analytics assistant. You support operations managers and COOs.\n\n"
         "Rules:\n"
@@ -135,43 +135,38 @@ async def chat_endpoint(request: ChatRequest):
         f"--- CURRENT DATABASE CONTEXT ---\n{context_str}\n---------------------------------"
     )
     
-    # Construct OpenRouter API Payload
-    openrouter_messages = [{"role": "system", "content": system_prompt}]
+    # Build messages list for Groq
+    groq_messages = [{"role": "system", "content": system_prompt}]
     for msg in messages:
-        openrouter_messages.append({"role": msg.role, "content": msg.content})
+        groq_messages.append({"role": msg.role, "content": msg.content})
         
-    # Send request to OpenRouter
-    api_key = settings.OPENROUTER_API_KEY
-    if not api_key:
-        # Check environment fallback
-        import os
-        api_key = os.environ.get("OPENROUTER_API_KEY", "")
+    # Resolve API key
+    import os
+    api_key = settings.GROQ_API_KEY or os.environ.get("GROQ_API_KEY", "")
         
     if not api_key:
         return {
             "role": "assistant",
             "content": (
                 "⚠️ **Assistant API Key Missing**\n\n"
-                "Please configure the `OPENROUTER_API_KEY` environment variable in Render or your local `.env` file to enable the AI assistant."
+                "Please configure the `GROQ_API_KEY` environment variable in Render or your local `.env` file to enable the AI assistant."
             )
         }
         
-    model = settings.OPENROUTER_MODEL or "openai/gpt-4o-mini"
+    model = settings.GROQ_MODEL or "llama-3.3-70b-versatile"
     
     try:
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+                "https://api.groq.com/openai/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {api_key}",
-                    "HTTP-Referer": "http://localhost:3000",
-                    "X-Title": "Workforce Pulse",
                     "Content-Type": "application/json"
                 },
                 json={
                     "model": model,
-                    "messages": openrouter_messages,
-                    "temperature": 0.1 # Low temperature for strict factual grounding
+                    "messages": groq_messages,
+                    "temperature": 0.1  # Low temperature for strict factual grounding
                 },
                 timeout=30.0
             )
@@ -180,7 +175,7 @@ async def chat_endpoint(request: ChatRequest):
                 error_detail = res.text
                 return {
                     "role": "assistant",
-                    "content": f"⚠️ **OpenRouter API Error** (Status {res.status_code}): {error_detail}"
+                    "content": f"⚠️ **Groq API Error** (Status {res.status_code}): {error_detail}"
                 }
                 
             res_data = res.json()
@@ -194,5 +189,5 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         return {
             "role": "assistant",
-            "content": f"⚠️ **Connection Error**: Failed to reach AI provider. Detail: {str(e)}"
+            "content": f"⚠️ **Connection Error**: Failed to reach Groq API. Detail: {str(e)}"
         }
