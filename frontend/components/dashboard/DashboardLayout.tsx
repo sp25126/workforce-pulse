@@ -85,14 +85,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* 3. Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-30 md:hidden flex">
+          <div className="fixed inset-0 z-30 md:hidden">
             {/* Backdrop */}
             <div 
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
               onClick={() => setMobileMenuOpen(false)}
             />
             {/* Drawer container */}
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-slate-200 shadow-2xl h-full animate-in slide-in-from-left duration-200">
+            <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white border-r border-slate-200 shadow-2xl h-full flex flex-col z-40 animate-in slide-in-from-left duration-200">
               <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
                 <div className="flex items-center space-x-3">
                   <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm">
