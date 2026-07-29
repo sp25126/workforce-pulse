@@ -40,9 +40,15 @@ def get_aggregates(
             "meta": {"total_records": 0, "filtered_records": 0, "date_range": None, "filters": {}}
         }
 
-    # Data sanitization
+    # Data sanitization & column mapping (is_repetitive in DB mapped to repetitive)
     df["duration_minutes"] = pd.to_numeric(df["duration_minutes"], errors="coerce").fillna(0.0)
-    df["repetitive"] = df["repetitive"].fillna(False).astype(bool)
+    
+    rep_col = "is_repetitive" if "is_repetitive" in df.columns else ("repetitive" if "repetitive" in df.columns else None)
+    if rep_col:
+        df["repetitive"] = df[rep_col].fillna(False).astype(bool)
+    else:
+        df["repetitive"] = False
+        
     df["hourly_rate_inr"] = pd.to_numeric(df["hourly_rate_inr"], errors="coerce").fillna(0.0)
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
 
