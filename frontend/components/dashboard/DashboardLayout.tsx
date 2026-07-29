@@ -66,7 +66,68 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* 2. Mobile Nav Header Bar */}
+      {/* 2. Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-30 md:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-350"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Drawer container */}
+          <div className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-slate-200 shadow-2xl h-full flex flex-col z-40">
+            <div className="flex items-center justify-between px-6 py-5.5 border-b border-slate-100">
+              <div className="flex items-center space-x-3">
+                <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm">
+                  <Activity className="h-4 w-4" />
+                </div>
+                <span className="font-extrabold text-slate-800">Workforce Pulse</span>
+              </div>
+              <button 
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+              {navigation.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <a
+                    key={index}
+                    href="#"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                      item.active 
+                        ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/50' 
+                        : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{item.name}</span>
+                  </a>
+                );
+              })}
+            </nav>
+
+            <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/20">
+              <div className="flex items-center space-x-3 px-2 py-1.5">
+                <div className="h-8.5 w-8.5 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center font-bold text-xs text-slate-600">
+                  AD
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">Audit Admin</p>
+                  <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Pulse reporting</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Mobile Nav Header Bar */}
       <div className="flex-1 flex flex-col md:pl-64">
         <header className="sticky top-0 z-20 md:hidden bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
@@ -82,67 +143,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="h-5 w-5" />
           </button>
         </header>
-
-        {/* 3. Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-30 md:hidden">
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            {/* Drawer container */}
-            <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white border-r border-slate-200 shadow-2xl h-full flex flex-col z-40 animate-in slide-in-from-left duration-200">
-              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-sm">
-                    <Activity className="h-4 w-4" />
-                  </div>
-                  <span className="font-extrabold text-slate-800">Workforce Pulse</span>
-                </div>
-                <button 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                {navigation.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <a
-                      key={index}
-                      href="#"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
-                        item.active 
-                          ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/50' 
-                          : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span>{item.name}</span>
-                    </a>
-                  );
-                })}
-              </nav>
-
-              <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/20">
-                <div className="flex items-center space-x-3 px-2 py-1.5">
-                  <div className="h-8.5 w-8.5 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center font-bold text-xs text-slate-600">
-                    AD
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Audit Admin</p>
-                    <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Pulse reporting</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 4. Page Main Content Container */}
         <main className="flex-1 p-6 sm:p-8 lg:p-10 max-w-7xl w-full mx-auto space-y-6">
