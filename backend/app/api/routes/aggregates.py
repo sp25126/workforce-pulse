@@ -1,8 +1,20 @@
-from fastapi import APIRouter, Query, HTTPException, status
-from typing import Optional, List, Dict, Any
+from fastapi import APIRouter, Query
+from typing import Optional
 from app.core.config import settings
 
 router = APIRouter()
+
+EMPTY_RESPONSE = {
+    "headline": {"total_hours": 0.0, "hours_recoverable": 0.0, "inr_recoverable": 0.0, "automation_potential_percent": 0.0},
+    "by_task_category": [],
+    "by_app": [],
+    "by_department": [],
+    "automation_ranking": [],
+    "weekly_trend": [],
+    "anomalies": [],
+    "meta": {"total_records": 0, "filtered_records": 0, "date_range": None, "filters": {}, "options": {"departments": [], "categories": [], "employees": [], "weeks": []}},
+    "db_error": None
+}
 
 def get_db_engine():
     from sqlalchemy import create_engine
@@ -18,15 +30,15 @@ def get_aggregates(
     import pandas as pd
     import numpy as np
 
+    if not settings.DATABASE_URL:
+        return {**EMPTY_RESPONSE, "db_error": "DATABASE_URL is not configured on the server."}
+
     try:
         engine = get_db_engine()
-        # Load all joined activity data from DB
         df = pd.read_sql("SELECT * FROM joined_activity", con=engine)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database connection error: {str(e)}"
-        )
+        # Return empty data with error context instead of crashing with 500
+        return {**EMPTY_RESPONSE, "db_error": f"Database connection error: {str(e)}"}
 
     if df.empty:
         return {
