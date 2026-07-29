@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     
     # OpenRouter API configs
     OPENROUTER_API_KEY: str = ""
-    OPENROUTER_MODEL: str = "google/gemini-2.5-flash:free"
+    OPENROUTER_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
