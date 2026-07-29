@@ -18,7 +18,7 @@ DEFAULT_PROVIDER_BASE_URLS = {
 
 def get_db_engine():
     from sqlalchemy import create_engine
-    return create_engine(settings.DATABASE_URL)
+    return create_engine(settings.db_url)
 
 def ensure_ai_settings_table():
     """

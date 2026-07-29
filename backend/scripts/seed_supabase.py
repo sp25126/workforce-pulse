@@ -17,7 +17,7 @@ def seed_database():
     emp_path = os.path.join(base_dir, "data", "raw", "employees.json")
     
     print("Connecting to database...")
-    engine = create_engine(settings.DATABASE_URL)
+    engine = create_engine(settings.db_url)
     
     # 1. Initialize Schema
     print("Initializing database schema...")

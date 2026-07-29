@@ -6,7 +6,7 @@ router = APIRouter()
 
 def get_db_engine():
     from sqlalchemy import create_engine
-    return create_engine(settings.DATABASE_URL)
+    return create_engine(settings.db_url)
 
 @router.get("/")
 def get_aggregates(
