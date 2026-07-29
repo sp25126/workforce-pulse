@@ -10,10 +10,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.routes import health, aggregates, chat, settings_ai
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Run startup logic (initialize DB tables) without blocking module imports
+    try:
+        from app.services.ai_settings import ensure_ai_settings_table
+        ensure_ai_settings_table()
+    except Exception as e:
+        print(f"Warning: Startup lifespan table creation failed: {e}")
+    yield
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Robust CORS middleware allowing development origins and wildcards

@@ -1,7 +1,6 @@
 import os
 import datetime
 from typing import Dict, Any, Optional
-from sqlalchemy import create_engine, text
 from app.core.config import settings
 from app.schemas.ai_settings import AISettingsRequest, AISettingsResponse
 from app.services.secret_crypto import encrypt_secret, decrypt_secret
@@ -18,12 +17,14 @@ DEFAULT_PROVIDER_BASE_URLS = {
 }
 
 def get_db_engine():
+    from sqlalchemy import create_engine
     return create_engine(settings.DATABASE_URL)
 
 def ensure_ai_settings_table():
     """
     Auto-creates the ai_settings table in Supabase PostgreSQL if missing.
     """
+    from sqlalchemy import text
     try:
         engine = get_db_engine()
         with engine.connect() as conn:
@@ -43,13 +44,11 @@ def ensure_ai_settings_table():
     except Exception as e:
         print(f"Warning: Failed to ensure ai_settings table in DB: {e}")
 
-# Initialize schema
-ensure_ai_settings_table()
-
 def get_ai_settings_raw(workspace_id: str = "default_workspace") -> Dict[str, Any]:
     """
     Fetches raw settings dictionary for workspace from DB or memory fallback.
     """
+    from sqlalchemy import text
     try:
         engine = get_db_engine()
         with engine.connect() as conn:
@@ -148,6 +147,7 @@ def save_ai_settings(req: AISettingsRequest, workspace_id: str = "default_worksp
 
     # Persist to database if available
     try:
+        from sqlalchemy import text
         engine = get_db_engine()
         with engine.connect() as conn:
             conn.execute(
@@ -193,6 +193,7 @@ def reset_ai_settings(workspace_id: str = "default_workspace") -> AISettingsResp
     }
 
     try:
+        from sqlalchemy import text
         engine = get_db_engine()
         with engine.connect() as conn:
             conn.execute(

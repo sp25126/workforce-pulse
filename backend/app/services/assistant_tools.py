@@ -1,6 +1,4 @@
-import pandas as pd
 from typing import Dict, Any, Optional
-from sqlalchemy import text
 from app.api.routes.aggregates import get_aggregates, get_db_engine
 
 def query_aggregates(filters: Dict[str, Any]) -> Dict[str, Any]:
@@ -26,6 +24,7 @@ def get_employee_detail(employee_id: str) -> Dict[str, Any]:
     """
     Fetches personal workload statistics, role, department, and compensation for a specific employee.
     """
+    from sqlalchemy import text
     try:
         # Fetch aggregates for employee, explicitly setting unused filters to None to bypass FastAPI Query defaults
         res = get_aggregates(department=None, task_category=None, employee_id=employee_id, week=None)

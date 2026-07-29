@@ -71,16 +71,21 @@ def get_aggregates(
 
     # Filter Application
     filtered_df = clean_df.copy()
+    active_filters = {}
     if department:
         filtered_df = filtered_df[filtered_df["department"].str.lower() == department.lower()]
+        active_filters["department"] = department
     if task_category:
         filtered_df = filtered_df[filtered_df["task_category"].str.lower() == task_category.lower()]
+        active_filters["task_category"] = task_category
     if employee_id:
         filtered_df = filtered_df[filtered_df["employee_id"].str.lower() == employee_id.lower()]
+        active_filters["employee_id"] = employee_id
     if week:
         # Week filter expects start of week date YYYY-MM-DD
         filtered_df["week_start"] = filtered_df["timestamp"].dt.to_period("W").dt.start_time.dt.strftime("%Y-%m-%d")
         filtered_df = filtered_df[filtered_df["week_start"] == week]
+        active_filters["week"] = week
 
     # Calculate Headline Metrics
     total_hours = round(float(filtered_df["duration_minutes"].sum() / 60.0), 1)
@@ -214,7 +219,8 @@ def get_aggregates(
             "total_records": len(df),
             "filtered_records": len(filtered_df),
             "date_range": f"{date_min} to {date_max}" if date_min and date_max else None,
-            "filters": {
+            "filters": active_filters,
+            "options": {
                 "departments": all_depts,
                 "categories": all_categories,
                 "employees": all_employees,
