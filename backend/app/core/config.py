@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     # e.g: '["http://localhost", "http://localhost:3000"]'
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     
+    # Supabase Connection URL
+    DATABASE_URL: str = "postgresql://postgres:Saumya84888@db.jtrissjdliytrnvevtjj.supabase.co:5432/postgres"
+    
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 settings = Settings()
