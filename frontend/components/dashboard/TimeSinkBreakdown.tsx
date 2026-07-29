@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useDashboard } from './DashboardContext';
-import { formatHours, formatCurrency } from '@/lib/formatters';
-import { BarChart3, AppWindow, Building } from 'lucide-react';
+import { formatHours } from '@/lib/formatters';
+import { BarChart3, AppWindow, Building, Check } from 'lucide-react';
 
 export default function TimeSinkBreakdown() {
-  const { data } = useDashboard();
+  const { data, filters, setFilters, removeFilter } = useDashboard();
   const [activeTab, setActiveTab] = useState<'tasks' | 'apps' | 'depts'>('tasks');
   if (!data) return null;
 
@@ -15,6 +15,22 @@ export default function TimeSinkBreakdown() {
   const maxTaskHours = by_task_category.length > 0 ? Math.max(...by_task_category.map(c => c.total_hours)) : 1;
   const maxAppHours = by_app.length > 0 ? Math.max(...by_app.map(a => a.total_hours)) : 1;
   const maxDeptHours = by_department.length > 0 ? Math.max(...by_department.map(d => d.total_hours)) : 1;
+
+  const handleTaskClick = (taskCategory: string) => {
+    if (filters.task_category === taskCategory) {
+      removeFilter('task_category');
+    } else {
+      setFilters({ task_category: taskCategory });
+    }
+  };
+
+  const handleDeptClick = (department: string) => {
+    if (filters.department === department) {
+      removeFilter('department');
+    } else {
+      setFilters({ department });
+    }
+  };
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full">
@@ -62,11 +78,21 @@ export default function TimeSinkBreakdown() {
               by_task_category.map((item, idx) => {
                 const repPercent = (item.hours_recoverable / item.total_hours) * 100;
                 const widthPercent = (item.total_hours / maxTaskHours) * 100;
+                const isSelected = filters.task_category === item.task_category;
 
                 return (
-                  <div key={idx} className="space-y-1.5">
+                  <div 
+                    key={idx} 
+                    onClick={() => handleTaskClick(item.task_category)}
+                    className={`space-y-1.5 p-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-all border ${
+                      isSelected ? 'bg-blue-50/50 border-blue-200 hover:bg-blue-50' : 'border-transparent'
+                    }`}
+                  >
                     <div className="flex items-center justify-between text-sm font-semibold">
-                      <span className="text-slate-700">{item.task_category}</span>
+                      <span className="text-slate-700 flex items-center space-x-1.5">
+                        {isSelected && <Check className="h-4 w-4 text-blue-600" />}
+                        <span>{item.task_category}</span>
+                      </span>
                       <span className="text-slate-500">
                         {formatHours(item.total_hours)} 
                         {item.hours_recoverable > 0 && (
@@ -77,20 +103,18 @@ export default function TimeSinkBreakdown() {
                       </span>
                     </div>
                     {/* Visual Stacked bar */}
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex" style={{ width: '100%' }}>
+                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex w-full">
                       {/* Repetitive/Recoverable part */}
                       {item.hours_recoverable > 0 && (
                         <div 
                           className="bg-amber-400 h-full transition-all" 
                           style={{ width: `${widthPercent * (repPercent / 100)}%` }}
-                          title={`Recoverable: ${formatHours(item.hours_recoverable)}`}
                         />
                       )}
                       {/* Non-repetitive part */}
                       <div 
                         className="bg-blue-500 h-full transition-all" 
                         style={{ width: `${widthPercent * ((100 - repPercent) / 100)}%` }}
-                        title={`Standard: ${formatHours(item.total_hours - item.hours_recoverable)}`}
                       />
                     </div>
                   </div>
@@ -109,7 +133,7 @@ export default function TimeSinkBreakdown() {
               by_app.map((item, idx) => {
                 const widthPercent = (item.total_hours / maxAppHours) * 100;
                 return (
-                  <div key={idx} className="space-y-1.5">
+                  <div key={idx} className="space-y-1.5 p-2 border border-transparent rounded-lg">
                     <div className="flex items-center justify-between text-sm font-semibold">
                       <span className="text-slate-700">{item.app_used}</span>
                       <span className="text-slate-500">{formatHours(item.total_hours)}</span>
@@ -135,15 +159,28 @@ export default function TimeSinkBreakdown() {
             ) : (
               by_department.map((item, idx) => {
                 const widthPercent = (item.total_hours / maxDeptHours) * 100;
+                const isSelected = filters.department === item.department;
+
                 return (
-                  <div key={idx} className="space-y-1.5">
+                  <div 
+                    key={idx} 
+                    onClick={() => handleDeptClick(item.department)}
+                    className={`space-y-1.5 p-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-all border ${
+                      isSelected ? 'bg-purple-50/50 border-purple-200 hover:bg-purple-50' : 'border-transparent'
+                    }`}
+                  >
                     <div className="flex items-center justify-between text-sm font-semibold">
-                      <span className="text-slate-700">{item.department}</span>
+                      <span className="text-slate-700 flex items-center space-x-1.5">
+                        {isSelected && <Check className="h-4 w-4 text-purple-600" />}
+                        <span>{item.department}</span>
+                      </span>
                       <span className="text-slate-500">{formatHours(item.total_hours)}</span>
                     </div>
                     <div className="h-3 bg-slate-100 rounded-full overflow-hidden w-full">
                       <div 
-                        className="bg-purple-500 h-full rounded-full transition-all" 
+                        className={`h-full rounded-full transition-all ${
+                          isSelected ? 'bg-purple-600' : 'bg-purple-500'
+                        }`} 
                         style={{ width: `${widthPercent}%` }}
                       />
                     </div>

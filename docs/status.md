@@ -16,6 +16,11 @@
 - [x] Step 3: KPI Cards & Custom SVG Charts
 - [x] Step 3: Anomaly quality flag list
 - [x] Step 3: Skeleton Loader & Error Handling Fallbacks
+- [x] Step 4: Shared context store for cross-filtering
+- [x] Step 4: Interactive click-to-filter department bars & task categories
+- [x] Step 4: Selected states & dynamic filter badge chips
+- [x] Step 4: Employee Drilldown Panel
+- [x] Step 4: Department peer comparisons & benchmarks
 - Initialized root monorepo folders and files.
 - Scaffolded Next.js 14 frontend with Tailwind, added minimal layout and `api.ts` utility.
 - Scaffolded FastAPI backend with routes, config, and `etl.py` pure functions.
@@ -33,9 +38,14 @@
 - Rendered ranked automation opportunities and custom lightweight SVG weekly trend charts.
 - Included alarm log listing flagged data quality anomalies (negative durations, outliers).
 - Setup skeleton loading screens and terminal fallback connection error alerts.
+- Integrated dynamic cross-filtering by wiring interactive click-handlers on department bars and task-category rows.
+- Enhanced active filter visibility by rendering custom dismissible filter badges/chips.
+- Created the `EmployeeDrilldown` profile panel showing personal workload stats and top candidate repetitive tasks.
+- Extracted and stored initial unfiltered dashboard stats as baseline benchmarks for rendering department-wise peer comparisons.
+- Rearranged dashboard grid layouts for better visual mapping of profile benchmarking next to the activity breakdowns.
 
 ## Next immediate task
-- Step 4: AI Insights integration, chat-agent features, and automated reports export.
+- Step 5: AI Assistant, chat capabilities, and reporting exports.
 
 ## Blocked on manual setup
 - (None)

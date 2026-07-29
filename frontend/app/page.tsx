@@ -10,6 +10,7 @@ import AutomationRanking from '@/components/dashboard/AutomationRanking';
 import WeeklyTrend from '@/components/dashboard/WeeklyTrend';
 import AnomalyCallouts from '@/components/dashboard/AnomalyCallouts';
 import LoadingSkeleton from '@/components/dashboard/LoadingSkeleton';
+import EmployeeDrilldown from '@/components/drilldown/EmployeeDrilldown';
 import { AlertCircle, Terminal } from 'lucide-react';
 
 function DashboardContent() {
@@ -58,24 +59,29 @@ function DashboardContent() {
           {/* 3. KPI Cards */}
           <KpiCards />
 
-          {/* 4. Time sink & Automation Opportunities */}
+          {/* 4. Time sink & Employee Drilldown Profile */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3">
               <TimeSinkBreakdown />
+            </div>
+            <div className="lg:col-span-2">
+              <EmployeeDrilldown />
+            </div>
+          </div>
+
+          {/* 5. Weekly Trend & Automation Opportunities */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3">
+              <WeeklyTrend />
             </div>
             <div className="lg:col-span-2">
               <AutomationRanking />
             </div>
           </div>
 
-          {/* 5. Weekly Trend & Anomaly Callouts */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-3">
-              <WeeklyTrend />
-            </div>
-            <div className="lg:col-span-2">
-              <AnomalyCallouts />
-            </div>
+          {/* 6. Activity Flags */}
+          <div className="grid grid-cols-1 gap-6">
+            <AnomalyCallouts />
           </div>
         </>
       )}
