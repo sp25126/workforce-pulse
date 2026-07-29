@@ -5,6 +5,7 @@ import httpx
 import json
 import re
 from app.core.config import settings
+from app.services.ai_settings import resolve_ai_provider_config
 from app.services.assistant_tools import (
     query_aggregates,
     get_employee_detail,
@@ -135,37 +136,47 @@ async def chat_endpoint(request: ChatRequest):
         f"--- CURRENT DATABASE CONTEXT ---\n{context_str}\n---------------------------------"
     )
     
-    # Build messages list for Groq
-    groq_messages = [{"role": "system", "content": system_prompt}]
+    # Build messages list
+    ai_messages = [{"role": "system", "content": system_prompt}]
     for msg in messages:
-        groq_messages.append({"role": msg.role, "content": msg.content})
+        ai_messages.append({"role": msg.role, "content": msg.content})
         
-    # Resolve API key
-    import os
-    api_key = settings.GROQ_API_KEY or os.environ.get("GROQ_API_KEY", "")
+    # Resolve AI provider configuration (BYOK or Platform default)
+    ai_config = resolve_ai_provider_config()
+    api_key = ai_config.get("api_key")
+    base_url = (ai_config.get("base_url") or "https://api.groq.com/openai/v1").rstrip("/")
+    model = ai_config.get("model") or "llama-3.3-70b-versatile"
+    source = ai_config.get("source", "platform")
+    provider = ai_config.get("provider", "groq")
         
     if not api_key:
         return {
             "role": "assistant",
             "content": (
                 "⚠️ **Assistant API Key Missing**\n\n"
-                "Please configure the `GROQ_API_KEY` environment variable in Render or your local `.env` file to enable the AI assistant."
+                "No active AI API key found. Please configure your API key in **Settings** or set `GROQ_API_KEY` in environment variables."
             )
         }
         
-    model = settings.GROQ_MODEL or "llama-3.3-70b-versatile"
+    # Format completion endpoint url
+    endpoint_url = base_url if base_url.endswith("/chat/completions") else f"{base_url}/chat/completions"
     
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    if "openrouter" in provider or "openrouter" in base_url:
+        headers["HTTP-Referer"] = "http://localhost:3000"
+        headers["X-Title"] = "Workforce Pulse"
+
     try:
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
+                endpoint_url,
+                headers=headers,
                 json={
                     "model": model,
-                    "messages": groq_messages,
+                    "messages": ai_messages,
                     "temperature": 0.1  # Low temperature for strict factual grounding
                 },
                 timeout=30.0
@@ -173,9 +184,10 @@ async def chat_endpoint(request: ChatRequest):
             
             if res.status_code != 200:
                 error_detail = res.text
+                source_label = f"BYOK ({provider})" if source == "byok" else f"Platform ({provider})"
                 return {
                     "role": "assistant",
-                    "content": f"⚠️ **Groq API Error** (Status {res.status_code}): {error_detail}"
+                    "content": f"⚠️ **AI Provider Error** [{source_label}] (Status {res.status_code}): {error_detail}"
                 }
                 
             res_data = res.json()
@@ -189,5 +201,5 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         return {
             "role": "assistant",
-            "content": f"⚠️ **Connection Error**: Failed to reach Groq API. Detail: {str(e)}"
+            "content": f"⚠️ **Connection Error**: Failed to reach AI endpoint ({provider}). Detail: {str(e)}"
         }

@@ -9,7 +9,7 @@ if str(backend_dir) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import health, aggregates, chat
+from app.api.routes import health, aggregates, chat, settings_ai
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,3 +29,4 @@ if settings.BACKEND_CORS_ORIGINS:
 app.include_router(health.router, tags=["health"])
 app.include_router(aggregates.router, prefix="/api/aggregates", tags=["aggregates"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+app.include_router(settings_ai.router, prefix="/api/settings/ai", tags=["settings"])

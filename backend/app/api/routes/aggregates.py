@@ -1,13 +1,11 @@
 from fastapi import APIRouter, Query, HTTPException, status
 from typing import Optional, List, Dict, Any
-import pandas as pd
-import numpy as np
-from sqlalchemy import create_engine
 from app.core.config import settings
 
 router = APIRouter()
 
 def get_db_engine():
+    from sqlalchemy import create_engine
     return create_engine(settings.DATABASE_URL)
 
 @router.get("/")
@@ -17,6 +15,9 @@ def get_aggregates(
     employee_id: Optional[str] = Query(None, description="Filter by employee ID"),
     week: Optional[str] = Query(None, description="Filter by week start date (YYYY-MM-DD)")
 ):
+    import pandas as pd
+    import numpy as np
+
     try:
         engine = get_db_engine()
         # Load all joined activity data from DB
@@ -39,212 +40,179 @@ def get_aggregates(
             "meta": {"total_records": 0, "filtered_records": 0, "date_range": None, "filters": {}}
         }
 
-    # Ensure timestamps are parsed
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-    
-    # Calculate billing/hourly rates for each row
-    # Default to 0.0 if not specified
-    df["effective_hourly_rate"] = 0.0
-    
-    # If hourly rate is directly present
-    has_hourly = df["hourly_rate_inr"].notna()
-    df.loc[has_hourly, "effective_hourly_rate"] = df.loc[has_hourly, "hourly_rate_inr"]
-    
-    # If annual CTC is present and hourly rate is not
-    has_ctc_only = df["annual_ctc_inr"].notna() & df["hourly_rate_inr"].isna()
-    # Assume 2080 standard working hours annually (8 hrs * 5 days * 52 weeks)
-    df.loc[has_ctc_only, "effective_hourly_rate"] = df.loc[has_ctc_only, "annual_ctc_inr"] / 2080.0
-    
-    # Total row duration in hours
-    df["duration_hours"] = df["duration_minutes"] / 60.0
-    
-    # Calculate recoverable cost
-    df["recoverable_inr"] = 0.0
-    is_rep = df["is_repetitive"] == True
-    df.loc[is_rep, "recoverable_inr"] = df.loc[is_rep, "duration_hours"] * df.loc[is_rep, "effective_hourly_rate"]
+    # Data sanitization
+    df["duration_minutes"] = pd.to_numeric(df["duration_minutes"], errors="coerce").fillna(0.0)
+    df["repetitive"] = df["repetitive"].fillna(False).astype(bool)
+    df["hourly_rate_inr"] = pd.to_numeric(df["hourly_rate_inr"], errors="coerce").fillna(0.0)
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
 
-    # Save metadata counts before filters
-    total_records = len(df)
+    # Flag Anomalies (Negative durations or extreme outliers > 12 hours)
+    anomalies = []
+    anomaly_rows = df[(df["duration_minutes"] < 0) | (df["duration_minutes"] > 720)]
+    for _, row in anomaly_rows.iterrows():
+        a_type = "negative_duration" if row["duration_minutes"] < 0 else "outlier_duration"
+        desc = f"Negative duration of {row['duration_minutes']} min detected" if a_type == "negative_duration" else f"Unusually high duration of {row['duration_minutes']} min detected"
+        anomalies.append({
+            "activity_id": int(row["id"]),
+            "employee_id": str(row["employee_id"]),
+            "type": a_type,
+            "description": desc,
+            "timestamp": row["timestamp"].isoformat() if pd.notnull(row["timestamp"]) else None
+        })
 
-    # 1. Apply Filters
-    filters_applied = {
-        "department": department,
-        "task_category": task_category,
-        "employee_id": employee_id,
-        "week": week
-    }
+    # Clean working dataset (exclude negative durations for metric aggregates)
+    clean_df = df[df["duration_minutes"] >= 0].copy()
 
+    # Filter Application
+    filtered_df = clean_df.copy()
     if department:
-        df = df[df["department"].str.lower() == department.lower()]
+        filtered_df = filtered_df[filtered_df["department"].str.lower() == department.lower()]
     if task_category:
-        df = df[df["task_category"].str.lower() == task_category.lower()]
+        filtered_df = filtered_df[filtered_df["task_category"].str.lower() == task_category.lower()]
     if employee_id:
-        df = df[df["employee_id"].str.lower() == employee_id.lower()]
+        filtered_df = filtered_df[filtered_df["employee_id"].str.lower() == employee_id.lower()]
     if week:
-        try:
-            week_start = pd.to_datetime(week).tz_localize("Asia/Kolkata")
-            week_end = week_start + pd.Timedelta(days=7)
-            df = df[(df["timestamp"] >= week_start) & (df["timestamp"] < week_end)]
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid week date format: {str(e)}"
-            )
+        # Week filter expects start of week date YYYY-MM-DD
+        filtered_df["week_start"] = filtered_df["timestamp"].dt.to_period("W").dt.start_time.dt.strftime("%Y-%m-%d")
+        filtered_df = filtered_df[filtered_df["week_start"] == week]
 
-    filtered_records = len(df)
+    # Calculate Headline Metrics
+    total_hours = round(float(filtered_df["duration_minutes"].sum() / 60.0), 1)
+    
+    # Repetitive hours & recoverable calculation (60% yield rule)
+    repetitive_df = filtered_df[filtered_df["repetitive"] == True]
+    repetitive_hours = float(repetitive_df["duration_minutes"].sum() / 60.0)
+    hours_recoverable = round(repetitive_hours * 0.6, 1)
 
-    # 2. Compute Headline
-    total_hours = float(df["duration_hours"].sum()) if len(df) > 0 else 0.0
-    hours_recoverable = float(df.loc[is_rep, "duration_hours"].sum()) if len(df) > 0 else 0.0
-    inr_recoverable = float(df.loc[is_rep, "recoverable_inr"].sum()) if len(df) > 0 else 0.0
-    automation_potential = (hours_recoverable / total_hours * 100) if total_hours > 0 else 0.0
+    # Recoverable INR cost (hours_recoverable * hourly rate for each task)
+    repetitive_df = repetitive_df.copy()
+    repetitive_df["recoverable_inr"] = (repetitive_df["duration_minutes"] / 60.0) * 0.6 * repetitive_df["hourly_rate_inr"]
+    inr_recoverable = round(float(repetitive_df["recoverable_inr"].sum()), 2)
+
+    automation_potential_percent = round((repetitive_hours / total_hours * 100), 1) if total_hours > 0 else 0.0
 
     headline = {
-        "total_hours": round(total_hours, 2),
-        "hours_recoverable": round(hours_recoverable, 2),
-        "inr_recoverable": round(inr_recoverable, 2),
-        "automation_potential_percent": round(automation_potential, 2)
+        "total_hours": total_hours,
+        "hours_recoverable": hours_recoverable,
+        "inr_recoverable": inr_recoverable,
+        "automation_potential_percent": automation_potential_percent
     }
 
-    # 3. Aggregations: by_task_category
-    by_category_list = []
-    if len(df) > 0:
-        cat_group = df.groupby("task_category")
-        for name, group in cat_group:
-            g_hours = float(group["duration_hours"].sum())
-            g_rep_hours = float(group.loc[group["is_repetitive"] == True, "duration_hours"].sum())
-            g_inr = float(group.loc[group["is_repetitive"] == True, "recoverable_inr"].sum())
-            by_category_list.append({
-                "task_category": name,
-                "total_hours": round(g_hours, 2),
-                "hours_recoverable": round(g_rep_hours, 2),
-                "inr_recoverable": round(g_inr, 2),
-                "automation_potential_percent": round((g_rep_hours / g_hours * 100), 2) if g_hours > 0 else 0.0
-            })
-        by_category_list = sorted(by_category_list, key=lambda x: x["total_hours"], reverse=True)
+    # Grouping by Task Category
+    task_cat_grouped = filtered_df.groupby("task_category", as_index=False).agg(
+        total_minutes=("duration_minutes", "sum")
+    )
+    rep_task_cat = repetitive_df.groupby("task_category", as_index=False).agg(
+        rep_minutes=("duration_minutes", "sum"),
+        recoverable_inr=("recoverable_inr", "sum")
+    )
+    task_cat_merged = pd.merge(task_cat_grouped, rep_task_cat, on="task_category", how="left").fillna(0.0)
+    
+    by_task_category = []
+    for _, row in task_cat_merged.sort_values(by="total_minutes", ascending=False).iterrows():
+        cat_total_hrs = round(row["total_minutes"] / 60.0, 1)
+        cat_rec_hrs = round((row["rep_minutes"] / 60.0) * 0.6, 1)
+        by_task_category.append({
+            "task_category": row["task_category"],
+            "total_hours": cat_total_hrs,
+            "hours_recoverable": cat_rec_hrs,
+            "inr_recoverable": round(row["recoverable_inr"], 2)
+        })
 
-    # 4. Aggregations: by_app
-    by_app_list = []
-    if len(df) > 0:
-        app_group = df.groupby("app_used")
-        for name, group in app_group:
-            g_hours = float(group["duration_hours"].sum())
-            g_rep_hours = float(group.loc[group["is_repetitive"] == True, "duration_hours"].sum())
-            g_inr = float(group.loc[group["is_repetitive"] == True, "recoverable_inr"].sum())
-            by_app_list.append({
-                "app_used": name,
-                "total_hours": round(g_hours, 2),
-                "hours_recoverable": round(g_rep_hours, 2),
-                "inr_recoverable": round(g_inr, 2)
-            })
-        by_app_list = sorted(by_app_list, key=lambda x: x["total_hours"], reverse=True)
+    # Grouping by App
+    app_grouped = filtered_df.groupby("app_used", as_index=False).agg(
+        total_minutes=("duration_minutes", "sum")
+    )
+    rep_app = repetitive_df.groupby("app_used", as_index=False).agg(
+        rep_minutes=("duration_minutes", "sum")
+    )
+    app_merged = pd.merge(app_grouped, rep_app, on="app_used", how="left").fillna(0.0)
 
-    # 5. Aggregations: by_department
-    by_dept_list = []
-    if len(df) > 0:
-        dept_group = df.groupby("department")
-        for name, group in dept_group:
-            g_hours = float(group["duration_hours"].sum())
-            g_rep_hours = float(group.loc[group["is_repetitive"] == True, "duration_hours"].sum())
-            g_inr = float(group.loc[group["is_repetitive"] == True, "recoverable_inr"].sum())
-            by_dept_list.append({
-                "department": name,
-                "total_hours": round(g_hours, 2),
-                "hours_recoverable": round(g_rep_hours, 2),
-                "inr_recoverable": round(g_inr, 2)
-            })
-        by_dept_list = sorted(by_dept_list, key=lambda x: x["total_hours"], reverse=True)
+    by_app = []
+    for _, row in app_merged.sort_values(by="total_minutes", ascending=False).iterrows():
+        by_app.append({
+            "app_used": row["app_used"],
+            "total_hours": round(row["total_minutes"] / 60.0, 1),
+            "hours_recoverable": round((row["rep_minutes"] / 60.0) * 0.6, 1)
+        })
 
-    # 6. Automation Ranking
-    # Formula-based ranking score: (hours_recoverable * average_hourly_rate)
-    # Highlight categories with highest recovery potentials.
+    # Grouping by Department
+    dept_grouped = filtered_df.groupby("department", as_index=False).agg(
+        total_minutes=("duration_minutes", "sum")
+    )
+    rep_dept = repetitive_df.groupby("department", as_index=False).agg(
+        rep_minutes=("duration_minutes", "sum")
+    )
+    dept_merged = pd.merge(dept_grouped, rep_dept, on="department", how="left").fillna(0.0)
+
+    by_department = []
+    for _, row in dept_merged.sort_values(by="total_minutes", ascending=False).iterrows():
+        by_department.append({
+            "department": row["department"],
+            "total_hours": round(row["total_minutes"] / 60.0, 1),
+            "hours_recoverable": round((row["rep_minutes"] / 60.0) * 0.6, 1)
+        })
+
+    # Automation Ranking (Top candidates by INR recoverable)
     automation_ranking = []
-    for item in by_category_list:
-        if item["hours_recoverable"] > 0:
-            score = item["hours_recoverable"] * (item["inr_recoverable"] / item["hours_recoverable"] if item["hours_recoverable"] > 0 else 0)
+    ranked_tasks = sorted(by_task_category, key=lambda x: x["inr_recoverable"], reverse=True)
+    for t in ranked_tasks:
+        if t["hours_recoverable"] > 0:
+            reason_str = f"High repetitive volume ({t['hours_recoverable']} hrs recoverable). Automation potential: {round(t['hours_recoverable']/t['total_hours']*100, 1) if t['total_hours']>0 else 0}%."
             automation_ranking.append({
-                "task_category": item["task_category"],
-                "score": round(score, 2),
-                "hours_recoverable": item["hours_recoverable"],
-                "inr_recoverable": item["inr_recoverable"],
-                "reason": f"High automation potential: {item['hours_recoverable']} hours of repetitive tasks costing INR {item['inr_recoverable']}."
+                "task_category": t["task_category"],
+                "hours_recoverable": t["hours_recoverable"],
+                "inr_recoverable": t["inr_recoverable"],
+                "reason": reason_str
             })
-    automation_ranking = sorted(automation_ranking, key=lambda x: x["score"], reverse=True)
 
-    # 7. Weekly Trend
+    # Weekly Trend Analysis
+    clean_df["week_start"] = clean_df["timestamp"].dt.to_period("W").dt.start_time.dt.strftime("%Y-%m-%d")
+    weekly_total = clean_df.groupby("week_start", as_index=False).agg(total_minutes=("duration_minutes", "sum"))
+    
+    rep_clean = clean_df[clean_df["repetitive"] == True].copy()
+    rep_clean["recoverable_inr"] = (rep_clean["duration_minutes"] / 60.0) * 0.6 * rep_clean["hourly_rate_inr"]
+    weekly_rep = rep_clean.groupby("week_start", as_index=False).agg(
+        rep_minutes=("duration_minutes", "sum"),
+        inr_recoverable=("recoverable_inr", "sum")
+    )
+    
+    weekly_merged = pd.merge(weekly_total, weekly_rep, on="week_start", how="left").fillna(0.0)
     weekly_trend = []
-    if len(df) > 0:
-        # Group by week starting Monday
-        df["week_start"] = df["timestamp"].dt.to_period("W").dt.start_time
-        week_group = df.groupby("week_start")
-        for ws, group in week_group:
-            g_hours = float(group["duration_hours"].sum())
-            g_rep_hours = float(group.loc[group["is_repetitive"] == True, "duration_hours"].sum())
-            g_inr = float(group.loc[group["is_repetitive"] == True, "recoverable_inr"].sum())
-            weekly_trend.append({
-                "week_start": ws.strftime("%Y-%m-%d"),
-                "total_hours": round(g_hours, 2),
-                "hours_recoverable": round(g_rep_hours, 2),
-                "inr_recoverable": round(g_inr, 2)
-            })
-        weekly_trend = sorted(weekly_trend, key=lambda x: x["week_start"])
+    for _, row in weekly_merged.sort_values(by="week_start").iterrows():
+        weekly_trend.append({
+            "week_start": row["week_start"],
+            "total_hours": round(row["total_minutes"] / 60.0, 1),
+            "hours_recoverable": round((row["rep_minutes"] / 60.0) * 0.6, 1),
+            "inr_recoverable": round(row["inr_recoverable"], 2)
+        })
 
-    # 8. Anomaly Reports
-    anomalies = []
-    if len(df) > 0:
-        # Check negative durations
-        neg_df = df[df["is_negative_duration"] == True]
-        for _, row in neg_df.iterrows():
-            anomalies.append({
-                "id": int(row["id"]),
-                "employee_id": row["employee_id"],
-                "timestamp": row["timestamp"].isoformat(),
-                "type": "negative_duration",
-                "description": f"Negative duration ({row['duration_minutes']} min) logged for {row['app_used']}."
-            })
-            
-        # Check missing durations
-        missing_df = df[df["is_missing_duration"] == True]
-        for _, row in missing_df.iterrows():
-            anomalies.append({
-                "id": int(row["id"]),
-                "employee_id": row["employee_id"],
-                "timestamp": row["timestamp"].isoformat(),
-                "type": "missing_duration",
-                "description": f"Missing activity duration logged for {row['app_used']}."
-            })
+    # Metadata options for UI filters
+    all_depts = sorted(clean_df["department"].dropna().unique().tolist())
+    all_categories = sorted(clean_df["task_category"].dropna().unique().tolist())
+    all_employees = sorted(clean_df["employee_id"].dropna().unique().tolist())
+    all_weeks = sorted(clean_df["week_start"].dropna().unique().tolist())
 
-        # Check statistical outliers (> threshold)
-        outlier_df = df[df["is_outlier_duration"] == True]
-        for _, row in outlier_df.iterrows():
-            anomalies.append({
-                "id": int(row["id"]),
-                "employee_id": row["employee_id"],
-                "timestamp": row["timestamp"].isoformat(),
-                "type": "outlier_duration",
-                "description": f"Activity duration outlier ({row['duration_minutes']} min) logged for {row['app_used']}."
-            })
-
-    # Meta
-    min_date = df["timestamp"].min() if len(df) > 0 else None
-    max_date = df["timestamp"].max() if len(df) > 0 else None
-    meta = {
-        "total_records": total_records,
-        "filtered_records": filtered_records,
-        "date_range": {
-            "start": min_date.isoformat() if min_date else None,
-            "end": max_date.isoformat() if max_date else None
-        },
-        "filters": filters_applied
-    }
+    date_min = clean_df["timestamp"].min().strftime("%Y-%m-%d") if not clean_df.empty and pd.notnull(clean_df["timestamp"].min()) else None
+    date_max = clean_df["timestamp"].max().strftime("%Y-%m-%d") if not clean_df.empty and pd.notnull(clean_df["timestamp"].max()) else None
 
     return {
         "headline": headline,
-        "by_task_category": by_category_list,
-        "by_app": by_app_list,
-        "by_department": by_dept_list,
+        "by_task_category": by_task_category,
+        "by_app": by_app,
+        "by_department": by_department,
         "automation_ranking": automation_ranking,
         "weekly_trend": weekly_trend,
         "anomalies": anomalies,
-        "meta": meta
+        "meta": {
+            "total_records": len(df),
+            "filtered_records": len(filtered_df),
+            "date_range": f"{date_min} to {date_max}" if date_min and date_max else None,
+            "filters": {
+                "departments": all_depts,
+                "categories": all_categories,
+                "employees": all_employees,
+                "weeks": all_weeks
+            }
+        }
     }

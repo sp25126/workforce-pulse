@@ -1,22 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, Settings, Activity, Menu, X } from 'lucide-react';
 
 interface SidebarItem {
   name: string;
+  href: string;
   icon: React.ComponentType<any>;
-  active: boolean;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigation: SidebarItem[] = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: true },
-    { name: 'Activity Audit', icon: Activity, active: false },
-    { name: 'Team Insights', icon: Users, active: false },
-    { name: 'Settings', icon: Settings, active: false }
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Activity Audit', href: '#', icon: Activity },
+    { name: 'Team Insights', href: '#', icon: Users },
+    { name: 'Settings', href: '/settings', icon: Settings }
   ];
 
   return (
@@ -24,30 +27,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* 1. Desktop Sidebar - Anchored strictly to top-0 left-0 bottom-0 */}
       <aside className="hidden md:flex md:w-64 md:flex-col fixed top-0 left-0 bottom-0 bg-white border-r border-slate-200/80 shadow-xs z-20">
         {/* Sidebar Header Logo */}
-        <div className="flex items-center space-x-3 px-6 py-5 border-b border-slate-100 shrink-0">
+        <Link href="/" className="flex items-center space-x-3 px-6 py-5 border-b border-slate-100 shrink-0">
           <div className="bg-blue-600 p-2 rounded-xl text-white shadow-sm shadow-blue-500/20">
             <Activity className="h-4.5 w-4.5" />
           </div>
           <span className="font-extrabold text-base tracking-tight text-slate-900">Workforce Pulse</span>
-        </div>
+        </Link>
 
         {/* Navigation links */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navigation.map((item, index) => {
             const Icon = item.icon;
+            const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#' && pathname?.startsWith(item.href));
+
             return (
-              <a
+              <Link
                 key={index}
-                href="#"
+                href={item.href}
                 className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 ${
-                  item.active 
+                  isActive 
                     ? 'bg-blue-50/90 text-blue-700 shadow-2xs border border-blue-100/60' 
                     : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -77,12 +82,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Drawer container */}
           <div className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-slate-200 shadow-2xl h-full flex flex-col z-50 animate-in slide-in-from-left-full duration-200">
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <div className="flex items-center space-x-3">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-sm">
                   <Activity className="h-4 w-4" />
                 </div>
                 <span className="font-extrabold text-slate-900 text-base">Workforce Pulse</span>
-              </div>
+              </Link>
               <button 
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors"
@@ -94,20 +99,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
               {navigation.map((item, index) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#' && pathname?.startsWith(item.href));
+
                 return (
-                  <a
+                  <Link
                     key={index}
-                    href="#"
+                    href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 ${
-                      item.active 
+                      isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-2xs border border-blue-100/60' 
                         : 'text-slate-400 hover:bg-slate-50 hover:text-slate-800'
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span>{item.name}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
@@ -130,12 +137,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* 3. Mobile Nav Header Bar */}
       <div className="flex-1 flex flex-col md:pl-64">
         <header className="sticky top-0 z-30 md:hidden bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-5 py-3.5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center space-x-2.5">
+          <Link href="/" className="flex items-center space-x-2.5">
             <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-xs">
               <Activity className="h-4 w-4" />
             </div>
             <span className="font-extrabold tracking-tight text-slate-900 text-sm">Workforce Pulse</span>
-          </div>
+          </Link>
           <button 
             onClick={() => setMobileMenuOpen(true)}
             className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors duration-200 cursor-pointer"
