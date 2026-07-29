@@ -13,7 +13,7 @@ Create a **Web Service** on Render with the following specifications:
 - **Plan**: `Starter`
 - **Build Command**:
   ```bash
-  python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+  python -m pip install --upgrade pip setuptools wheel && pip install --only-binary=:all: -r requirements.txt
   ```
 - **Start Command**:
   ```bash
@@ -59,6 +59,6 @@ Create a **Web Service** on Render:
 
 ---
 
-## Further Troubleshooting
+## Troubleshooting
 
-If you encounter build or runtime issues on Render, refer to the [Render Troubleshooting Guide](file:///c:/Users/saumy/OneDrive/Desktop/workforce%20pulse/docs/render-troubleshooting.md).
+If you encounter build errors (such as `pydantic-core` / `maturin` failures under Python 3.14), refer to the [Render Troubleshooting Guide](file:///c:/Users/saumy/OneDrive/Desktop/workforce%20pulse/docs/render-troubleshooting.md).

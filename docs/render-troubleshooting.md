@@ -4,43 +4,63 @@ This document provides actionable steps to diagnose and resolve deployment failu
 
 ---
 
-## 1. Render Uses the Wrong Python Version (e.g. Python 3.14)
+## 1. Error: `pydantic-core` / `maturin` Failed (`Read-only file system os error 30`)
 
-### Symptoms
-- Render build logs show `Using Python 3.14.0` or `Building wheel for pandas (pyproject.toml) ... error`.
-- Build fails during Cython or C++ compilation of pandas/numpy.
+### Full Error Traceback Example
+```text
+Preparing metadata (pyproject.toml): finished with status 'error'
+  error: subprocess-exited-with-error
+  × Preparing metadata (pyproject.toml) did not run successfully.
+      warning: failed to write cache, path: /usr/local/cargo/registry/... Read-only file system (os error 30)
+      error: failed to create directory `/usr/local/cargo/registry/cache/...`
+      Caused by: Read-only file system (os error 30)
+      💥 maturin failed
+      Caused by: Cargo metadata failed.
+      Error running maturin: Command '['maturin', 'pep517', 'write-dist-info', ..., '/opt/render/project/src/.venv/bin/python3.14']' returned non-zero exit status 1.
+error: metadata-generation-failed
+× Encountered error while generating package metadata.
+╰─> pydantic-core
+```
 
-### Cause
-Render defaults to its latest available Python image if it cannot detect runtime configuration.
+### Root Cause
+Look at the path in the traceback: `/opt/render/project/src/.venv/bin/python3.14`.
+Render is building against **Python 3.14**. Since `pydantic-core` (written in Rust) does not publish pre-compiled wheel binaries for unreleased/experimental Python 3.14, `pip` falls back to building it from source using Rust/Maturin. Maturin attempts to write to `/usr/local/cargo/registry`, which fails because Render's build container filesystem is read-only outside the project directory.
 
-### Fix
-1. Ensure `runtime.txt` containing `python-3.12.9` is present in both the repository root and the `backend/` subdirectory.
-2. In the Render Dashboard under **Environment Settings**, verify that the key `PYTHON_VERSION` is explicitly set to `3.12.9`.
-3. In `render.yaml`, verify `envVars` lists `- key: PYTHON_VERSION` with `value: 3.12.9`.
+### Exact Fix Steps
+
+#### Step 1: Force Render to use Python 3.12.9
+In the **Render Dashboard**:
+1. Open your backend service (`workforce-pulse-backend`).
+2. Go to **Environment** settings.
+3. Add or edit the environment variable:
+   - **Key**: `PYTHON_VERSION`
+   - **Value**: `3.12.9`
+4. Under **Settings**, verify **Root Directory** is set to `backend`.
+
+#### Step 2: Clear the Cached Virtual Environment
+Render caches the `.venv` directory between builds. If `.venv` was created with Python 3.14, changing `PYTHON_VERSION` may not recreate `.venv` automatically.
+- In the Render Dashboard, click **Manual Deploy** > **Clear build cache & deploy**.
+
+#### Step 3: Enforce Binary Wheel Installation
+In `render.yaml` and build commands, use `--only-binary=:all:` to force `pip` to install pre-compiled wheel binaries and reject source compilation:
+```bash
+python -m pip install --upgrade pip setuptools wheel && pip install --only-binary=:all: -r requirements.txt
+```
 
 ---
 
-## 2. Pandas Compiles from Source
-
-### Symptoms
-- Long build execution times followed by GCC / Cython compiler errors.
+## 2. Error: `pandas` Compiles from Source
 
 ### Cause
-The python version in use does not have pre-compiled wheels published for pandas 2.2.3.
+Python version in use (e.g. Python 3.14) has no pre-compiled wheels for pandas 2.2.3.
 
 ### Fix
-- Ensure Python runtime is pinned to **3.12.9** and `requirements.txt` locks `pandas==2.2.3`.
-- Verify the build command upgrades `pip`, `setuptools`, and `wheel` before installing requirements:
-  ```bash
-  python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
-  ```
+- Ensure Python runtime is pinned to **3.12.9** (`runtime.txt` and `PYTHON_VERSION=3.12.9`).
+- Clear Render build cache and redeploy.
 
 ---
 
 ## 3. Startup Import Errors or DB Connection Crashes
-
-### Symptoms
-- Render app crashes during startup with `OperationalError`, `ConnectionRefused`, or `ModuleNotFoundError`.
 
 ### Cause
 Importing routes or modules at top level executes DB connection code before environment variables are injected or while the DB is starting up.
@@ -52,18 +72,3 @@ Importing routes or modules at top level executes DB connection code before envi
   ```bash
   python -c "import app.main; print('Import clean!')"
   ```
-
----
-
-## 4. Root Directory & Path Resolution Issues
-
-### Symptoms
-- Render reports `No module named app` or `FileNotFoundError: requirements.txt`.
-
-### Cause
-The Render Web Service is set to the repository root instead of the `backend/` directory.
-
-### Fix
-1. In Render Dashboard > Service Settings, set **Root Directory** to `backend`.
-2. Confirm **Build Command** is `pip install -r requirements.txt` or `python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt`.
-3. Confirm **Start Command** is `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
