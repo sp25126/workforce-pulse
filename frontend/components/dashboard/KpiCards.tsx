@@ -21,7 +21,7 @@ export default function KpiCards() {
       icon: Clock,
       color: "text-blue-600",
       bgColor: "bg-blue-50/80",
-      borderGlow: "group-hover:border-blue-200",
+      borderGlow: "hover:border-blue-300",
       hasMethodology: false
     },
     {
@@ -31,7 +31,7 @@ export default function KpiCards() {
       icon: Zap,
       color: "text-amber-600",
       bgColor: "bg-amber-50/80",
-      borderGlow: "group-hover:border-amber-200",
+      borderGlow: "hover:border-amber-300",
       hasMethodology: true
     },
     {
@@ -41,7 +41,7 @@ export default function KpiCards() {
       icon: Wallet,
       color: "text-emerald-600",
       bgColor: "bg-emerald-50/80",
-      borderGlow: "group-hover:border-emerald-200",
+      borderGlow: "hover:border-emerald-300",
       hasMethodology: true
     },
     {
@@ -51,7 +51,7 @@ export default function KpiCards() {
       icon: Activity,
       color: "text-purple-600",
       bgColor: "bg-purple-50/80",
-      borderGlow: "group-hover:border-purple-200",
+      borderGlow: "hover:border-purple-300",
       hasMethodology: false
     }
   ];
@@ -59,22 +59,24 @@ export default function KpiCards() {
   return (
     <div className="space-y-4">
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {cardConfig.map((card, idx) => {
           const Icon = card.icon;
           return (
             <div 
               key={idx} 
-              className={`group bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-default ${card.borderGlow}`}
+              className={`group bg-white border border-slate-200/90 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-default ${card.borderGlow}`}
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
-                <div className={`p-2.5 rounded-xl ${card.bgColor} ${card.color} transition-colors duration-300`}>
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">{card.title}</span>
+                <div className={`p-2.5 rounded-xl ${card.bgColor} ${card.color} transition-colors duration-200 shrink-0`}>
                   <Icon className="h-5 w-5" />
                 </div>
               </div>
               <div>
-                <div className="text-3xl font-extrabold text-slate-800 tracking-tight leading-none">{card.value}</div>
+                <div className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">
+                  {card.value}
+                </div>
                 <p className="text-xs font-semibold text-slate-500 mt-2.5 leading-snug">{card.description}</p>
                 {card.hasMethodology && (
                   <button
@@ -94,15 +96,15 @@ export default function KpiCards() {
       {/* Methodology Modal */}
       {showMethodology && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all duration-300">
-          <div className="bg-white/95 border border-slate-200 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h3 className="font-bold text-slate-800 text-sm flex items-center space-x-2.5">
                 <Info className="h-4 w-4 text-blue-600" />
                 <span>Headline Calculation Methodology</span>
               </h3>
               <button 
                 onClick={() => setShowMethodology(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-50 transition-all cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -111,7 +113,7 @@ export default function KpiCards() {
             <div className="p-6 space-y-5 text-sm text-slate-600">
               <div className="space-y-2">
                 <h4 className="font-bold text-slate-800 text-[10px] uppercase tracking-wider">Formula Definitions</h4>
-                <div className="bg-slate-50 border border-slate-150 p-4 rounded-lg font-mono text-xs text-slate-700 leading-relaxed space-y-1">
+                <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-xl font-mono text-xs text-slate-700 leading-relaxed space-y-1">
                   <div>Recoverable hours = repetitive minutes × 0.6 ÷ 60</div>
                   <div>Recoverable INR = recoverable hours × hourly rate</div>
                 </div>
@@ -156,7 +158,7 @@ export default function KpiCards() {
             <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setShowMethodology(false)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition-all cursor-pointer"
               >
                 Dismiss
               </button>

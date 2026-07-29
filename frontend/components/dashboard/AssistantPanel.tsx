@@ -110,7 +110,6 @@ export default function AssistantPanel() {
 
   // Helper to parse text and highlight citations [source: ...]
   const renderMessageContent = (content: string) => {
-    // Regex matches [source: text here]
     const citationRegex = /\[source:\s*([^\]]+)\]/gi;
     const parts = [];
     let lastIndex = 0;
@@ -127,10 +126,10 @@ export default function AssistantPanel() {
       parts.push(
         <span 
           key={match.index} 
-          className="inline-flex items-center bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-[9px] px-1.5 py-0.5 rounded-full select-none ml-1 cursor-help tracking-wide"
+          className="inline-flex items-center bg-blue-50/90 hover:bg-blue-100/80 border border-blue-200/70 text-blue-700 font-extrabold text-[9px] px-1.5 py-0.5 rounded-md select-none ml-1 cursor-help tracking-wide"
           title={`Data verified from: ${sourceText}`}
         >
-          <Quote className="h-2 w-2 mr-0.5" />
+          <Quote className="h-2 w-2 mr-0.5 text-blue-500" />
           {sourceText}
         </span>
       );
@@ -147,29 +146,29 @@ export default function AssistantPanel() {
   };
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col h-[400px] overflow-hidden">
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-[420px] overflow-hidden">
       {/* Panel Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/20 shrink-0">
+      <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 shrink-0">
         <div className="flex items-center space-x-2.5">
-          <div className="bg-blue-50 border border-blue-150 p-1.5 rounded-lg text-blue-600">
-            <Bot className="h-5 w-5" />
+          <div className="bg-blue-50 border border-blue-150 p-2 rounded-xl text-blue-600">
+            <Bot className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800 text-sm">Grounded AI Assistant</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operational copilot</p>
+            <h3 className="font-bold text-slate-900 text-sm">Grounded AI Assistant</h3>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Operational copilot</p>
           </div>
         </div>
         <button
           onClick={handleClearHistory}
           disabled={loading}
-          className="text-[10px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded transition-all cursor-pointer disabled:opacity-50"
+          className="text-[10px] font-extrabold text-rose-600 bg-rose-50 hover:bg-rose-100/80 border border-rose-200/50 px-2.5 py-1 rounded-lg transition-all cursor-pointer disabled:opacity-50"
         >
           Reset Session
         </button>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50/30">
+      <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-slate-50/30">
         {messages.map((msg) => {
           const isBot = msg.role === 'assistant';
           return (
@@ -178,19 +177,19 @@ export default function AssistantPanel() {
               className={`flex items-start space-x-2.5 ${isBot ? '' : 'flex-row-reverse space-x-reverse'}`}
             >
               {/* Avatar Icon */}
-              <div className={`h-7 w-7 rounded-lg flex items-center justify-center border shrink-0 ${
+              <div className={`h-7 w-7 rounded-xl flex items-center justify-center border shrink-0 ${
                 isBot 
-                  ? 'bg-blue-50 border-blue-150 text-blue-600' 
-                  : 'bg-slate-100 border-slate-250 text-slate-600'
+                  ? 'bg-blue-50 border-blue-200/80 text-blue-600' 
+                  : 'bg-slate-100 border-slate-250 text-slate-700'
               }`}>
                 {isBot ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
               </div>
 
               {/* Message Bubble */}
-              <div className={`p-3 rounded-xl max-w-[85%] text-xs leading-relaxed font-semibold border ${
+              <div className={`p-3.5 rounded-2xl max-w-[88%] text-xs leading-relaxed font-semibold border shadow-2xs ${
                 isBot 
-                  ? 'bg-white border-slate-200 text-slate-700 shadow-sm' 
-                  : 'bg-blue-600 border-blue-650 text-white shadow-sm'
+                  ? 'bg-white border-slate-200/90 text-slate-750' 
+                  : 'bg-blue-600 border-blue-700 text-white'
               }`}>
                 {isBot ? renderMessageContent(msg.content) : msg.content}
               </div>
@@ -201,10 +200,10 @@ export default function AssistantPanel() {
         {/* Loading Spinner */}
         {loading && (
           <div className="flex items-center space-x-2.5">
-            <div className="h-7 w-7 rounded-lg bg-blue-50 border border-blue-150 text-blue-600 flex items-center justify-center shrink-0">
+            <div className="h-7 w-7 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shrink-0">
               <Bot className="h-4 w-4" />
             </div>
-            <div className="p-3 bg-white border border-slate-200 rounded-xl flex items-center space-x-2 shadow-sm text-xs font-semibold text-slate-400">
+            <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl flex items-center space-x-2 shadow-2xs text-xs font-semibold text-slate-400">
               <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-500" />
               <span>Querying database aggregates...</span>
             </div>
@@ -213,7 +212,7 @@ export default function AssistantPanel() {
 
         {/* Error Flag Alert */}
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start space-x-2.5 text-xs text-rose-800 font-semibold shadow-sm">
+          <div className="p-3 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-start space-x-2.5 text-xs text-rose-800 font-semibold shadow-2xs">
             <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p>Failed to query assistant endpoint.</p>
@@ -226,19 +225,19 @@ export default function AssistantPanel() {
       </div>
 
       {/* Input controls footer */}
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-100 bg-white flex items-center space-x-2 shrink-0">
+      <form onSubmit={handleSend} className="p-3.5 border-t border-slate-100 bg-white flex items-center space-x-2 shrink-0">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Ask a question (e.g. Who spent most time in Finance?)"
           disabled={loading}
-          className="flex-1 bg-slate-50 border border-slate-200 focus:border-blue-500 rounded-lg px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all disabled:opacity-50"
+          className="flex-1 bg-slate-50/80 border border-slate-200/90 focus:border-blue-500 rounded-xl px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={loading || !inputValue.trim()}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer"
+          className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer shrink-0 active:scale-95"
         >
           <Send className="h-4 w-4" />
         </button>

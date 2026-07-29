@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useDashboard } from './DashboardContext';
-import { RefreshCw, FilterX, X } from 'lucide-react';
+import { RefreshCw, FilterX, X, SlidersHorizontal } from 'lucide-react';
 import { FilterState } from '@/types/aggregates';
 import ExportButton from '../export/ExportButton';
 
@@ -15,7 +15,6 @@ export default function DashboardHeader() {
 
   const hasActiveFilters = Object.keys(filters).length > 0;
 
-  // Format filter values for chips
   const getFilterLabel = (key: keyof FilterState, value: string) => {
     switch (key) {
       case 'department': return `Dept: ${value}`;
@@ -27,17 +26,23 @@ export default function DashboardHeader() {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-5 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 space-y-4">
+      {/* Header top controls row */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         {/* Filters selectors */}
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-2.5 sm:gap-3 items-center flex-1">
+          <div className="hidden sm:flex items-center space-x-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <span>Filters</span>
+          </div>
+
           {/* Department Filter */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-slate-500 mb-1">Department</label>
+          <div className="flex flex-col min-w-[130px] flex-1 sm:flex-none">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Department</label>
             <select
               value={filters.department || ''}
               onChange={(e) => handleSelectChange('department', e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+              className="bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
               <option value="">All Departments</option>
               {metaOptions.departments.map(dept => (
@@ -47,12 +52,12 @@ export default function DashboardHeader() {
           </div>
 
           {/* Task Category Filter */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-slate-500 mb-1">Task Category</label>
+          <div className="flex flex-col min-w-[130px] flex-1 sm:flex-none">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Task Category</label>
             <select
               value={filters.task_category || ''}
               onChange={(e) => handleSelectChange('task_category', e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+              className="bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
               <option value="">All Categories</option>
               {metaOptions.categories.map(cat => (
@@ -62,12 +67,12 @@ export default function DashboardHeader() {
           </div>
 
           {/* Employee ID Filter */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-slate-500 mb-1">Employee ID</label>
+          <div className="flex flex-col min-w-[120px] flex-1 sm:flex-none">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Employee ID</label>
             <select
               value={filters.employee_id || ''}
               onChange={(e) => handleSelectChange('employee_id', e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+              className="bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
               <option value="">All Employees</option>
               {metaOptions.employees.map(emp => (
@@ -77,12 +82,12 @@ export default function DashboardHeader() {
           </div>
 
           {/* Week Filter */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-slate-500 mb-1">Week starting</label>
+          <div className="flex flex-col min-w-[120px] flex-1 sm:flex-none">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Week Starting</label>
             <select
               value={filters.week || ''}
               onChange={(e) => handleSelectChange('week', e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+              className="bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
               <option value="">All Weeks</option>
               {metaOptions.weeks.map(w => (
@@ -92,23 +97,24 @@ export default function DashboardHeader() {
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex items-center space-x-2 pt-2 md:pt-0">
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200/80 rounded-xl transition-all cursor-pointer active:scale-95"
             >
-              <FilterX className="h-4 w-4" />
+              <FilterX className="h-3.5 w-3.5" />
               <span>Reset</span>
             </button>
           )}
+
           <button
             onClick={refresh}
             disabled={loading}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-200/70 rounded-xl transition-all disabled:opacity-50 cursor-pointer active:scale-95"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
           
@@ -116,21 +122,21 @@ export default function DashboardHeader() {
         </div>
       </div>
 
-      {/* Filter Chips Display */}
+      {/* Active Filter Chips */}
       {hasActiveFilters && (
         <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-slate-400 mr-1">Active Filters:</span>
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mr-1">Context Active:</span>
           {Object.entries(filters).map(([key, val]) => {
             if (!val) return null;
             return (
               <div 
                 key={key} 
-                className="bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs pl-2.5 pr-1 py-1 rounded-full flex items-center space-x-1.5 shadow-sm"
+                className="bg-blue-50/90 border border-blue-200/80 text-blue-800 font-bold text-xs pl-3 pr-1.5 py-1 rounded-lg flex items-center space-x-1.5 shadow-2xs transition-all"
               >
                 <span>{getFilterLabel(key as keyof FilterState, val)}</span>
                 <button 
                   onClick={() => removeFilter(key as keyof FilterState)}
-                  className="hover:bg-blue-150 p-0.5 rounded-full text-blue-500 hover:text-blue-700 transition-all cursor-pointer"
+                  className="hover:bg-blue-200/60 p-0.5 rounded-full text-blue-600 hover:text-blue-900 transition-colors cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                 </button>

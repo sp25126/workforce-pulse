@@ -13,8 +13,8 @@ export default function WeeklyTrend() {
 
   if (weekly_trend.length === 0) {
     return (
-      <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm p-6 flex flex-col h-full items-center justify-center min-h-[260px]">
-        <p className="text-slate-400 text-sm font-semibold">No weekly trend data available.</p>
+      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-sm p-6 flex flex-col h-full items-center justify-center min-h-[260px]">
+        <p className="text-slate-400 text-xs font-semibold">No weekly trend data available under active filter context.</p>
       </div>
     );
   }
@@ -46,15 +46,15 @@ export default function WeeklyTrend() {
   const yTicks = [0, maxHours / 2, maxHours];
 
   const colWidth = graphWidth / weekly_trend.length;
-  const barWidth = Math.min(colWidth * 0.35, 20);
+  const barWidth = Math.min(colWidth * 0.35, 22);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col h-full overflow-hidden">
+    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full overflow-hidden">
       {/* Chart Header */}
-      <div className="px-6 py-4.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/20">
+      <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/30">
         <div className="space-y-0.5">
-          <h3 className="font-bold text-slate-800 text-lg flex items-center space-x-2">
-            <CalendarRange className="h-5 w-5 text-blue-500" />
+          <h3 className="font-bold text-slate-900 text-base flex items-center space-x-2">
+            <CalendarRange className="h-4.5 w-4.5 text-blue-600" />
             <span>Weekly Activity & Waste Trend</span>
           </h3>
           <p className="text-xs font-semibold text-slate-500 flex items-center">
@@ -68,20 +68,20 @@ export default function WeeklyTrend() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center space-x-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="flex items-center space-x-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider shrink-0">
           <div className="flex items-center space-x-1.5">
-            <div className="h-2.5 w-2.5 rounded bg-blue-500 shadow-sm"></div>
+            <div className="h-2.5 w-2.5 rounded bg-blue-500 shadow-2xs"></div>
             <span>Total Time</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <div className="h-2.5 w-2.5 rounded bg-amber-400 shadow-sm"></div>
+            <div className="h-2.5 w-2.5 rounded bg-amber-400 shadow-2xs"></div>
             <span>Repetitive (Waste)</span>
           </div>
         </div>
       </div>
 
       {/* SVG Container */}
-      <div className="p-6 flex-1 flex flex-col justify-center">
+      <div className="p-5 md:p-6 flex-1 flex flex-col justify-center">
         <div className="w-full overflow-x-auto">
           <svg 
             viewBox={`0 0 ${width} ${height}`} 
@@ -123,7 +123,6 @@ export default function WeeklyTrend() {
               const yTotal = height - paddingBottom - totalBarHeight;
               const yRep = height - paddingBottom - repBarHeight;
 
-              // Extract date parsing format
               let displayDate = item.week_start;
               try {
                 const date = new Date(item.week_start);
@@ -138,8 +137,8 @@ export default function WeeklyTrend() {
                     y={yTotal} 
                     width={barWidth} 
                     height={totalBarHeight} 
-                    rx="3" 
-                    className="fill-blue-500/80 group-hover:fill-blue-500 transition-all duration-300"
+                    rx="4" 
+                    className="fill-blue-500/85 group-hover:fill-blue-600 transition-colors duration-200"
                   />
                   {/* Recoverable Hours Bar (Stacked Overlay) */}
                   {repBarHeight > 0 && (
@@ -148,8 +147,8 @@ export default function WeeklyTrend() {
                       y={yRep} 
                       width={barWidth} 
                       height={repBarHeight} 
-                      rx="3" 
-                      className="fill-amber-400 group-hover:fill-amber-500 transition-all duration-300"
+                      rx="4" 
+                      className="fill-amber-400 group-hover:fill-amber-500 transition-colors duration-200"
                     />
                   )}
 
