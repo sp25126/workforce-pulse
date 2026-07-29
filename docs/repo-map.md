@@ -17,6 +17,8 @@ This document describes the layout of the **Workforce Pulse** repository, highli
 ## Documentation & Guides (`docs/`)
 
 - `docs/setup-guide.md` - Complete local development, DB seeding, and environment setup instructions.
+- `docs/vercel-deploy.md` - Vercel Next.js deployment guide, Root Directory config, and env vars.
+- `docs/vercel-checklist.md` - Vercel 404 troubleshooting and QA checklist.
 - `docs/render-deploy.md` - Render service build/start commands and required env vars.
 - `docs/render-troubleshooting.md` - Step-by-step diagnostics for Render build or runtime failures.
 - `docs/ai-prompts.md` & `prompts/ai-prompts.md` - Reusable prompt templates for AI developer assistance.
