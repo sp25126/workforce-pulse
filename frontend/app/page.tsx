@@ -12,6 +12,7 @@ import AnomalyCallouts from '@/components/dashboard/AnomalyCallouts';
 import LoadingSkeleton from '@/components/dashboard/LoadingSkeleton';
 import EmployeeDrilldown from '@/components/drilldown/EmployeeDrilldown';
 import AssistantPanel from '@/components/dashboard/AssistantPanel';
+import ExecutiveSummary from '@/components/export/ExecutiveSummary';
 import { AlertCircle, Terminal } from 'lucide-react';
 
 function DashboardContent() {
@@ -89,6 +90,9 @@ function DashboardContent() {
               <AssistantPanel />
             </div>
           </div>
+
+          {/* Hidden Executive Summary Export Target */}
+          <ExecutiveSummary />
         </>
       )}
     </div>

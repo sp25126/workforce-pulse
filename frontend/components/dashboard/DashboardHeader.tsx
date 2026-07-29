@@ -4,6 +4,7 @@ import React from 'react';
 import { useDashboard } from './DashboardContext';
 import { RefreshCw, FilterX, X } from 'lucide-react';
 import { FilterState } from '@/types/aggregates';
+import ExportButton from '../export/ExportButton';
 
 export default function DashboardHeader() {
   const { filters, setFilters, removeFilter, metaOptions, loading, refresh, clearFilters } = useDashboard();
@@ -110,6 +111,8 @@ export default function DashboardHeader() {
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
+          
+          <ExportButton />
         </div>
       </div>
 

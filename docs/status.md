@@ -47,14 +47,19 @@
 - [x] Step 5: Multi-turn session memory for filters context tracking
 - [x] Step 5: Strict numeric citations mapping logic
 - [x] Step 5: Assistant chat interface panel on dashboard UI
+- [x] Step 6: One-page Executive Summary Export (PDF)
+- [x] Step 6: Synchronized dynamic filters and live-data matching exports
 
 - Created `backend/app/services/assistant_tools.py` wrapping aggregates and employee details for LLM tool contexts.
 - Built `POST /api/chat` route in `backend/app/api/routes/chat.py` with strict system prompt configuration and in-memory multi-turn filters mapping.
 - Integrated the AI Assistant chatbot interface panel in `frontend/components/dashboard/AssistantPanel.tsx` with source citation pill parsing.
 - Wrote full test harness covering regex query parsers, tool wrapper functions, and chat API JSON responses.
+- Installed `html-to-image` and `jspdf` libraries for client-side document rendering.
+- Created `frontend/components/export/ExecutiveSummary.tsx` rendering hidden, structured A4 reports covering active KPIs, top 5 opportunities, anomalies, and footnotes.
+- Built `frontend/components/export/ExportButton.tsx` executing dynamic client-side PDF generation, rendering, and download pipelines.
 
 ## Next immediate task
-- Step 6: Production deployment verification and multi-tenant scaling prep.
+- Step 7: Operations audit dashboard final validation.
 
 ## Blocked on manual setup
 - (None)
