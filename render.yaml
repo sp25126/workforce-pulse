@@ -1,32 +1,36 @@
 services:
-  # FastAPI Backend
+  # FastAPI Backend Service
   - type: web
     name: workforce-pulse-backend
     env: python
     rootDir: backend
     buildCommand: python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
-    startCommand: PYTHONPATH=. uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.8
+        value: 3.12.9
+      - key: APP_ENV
+        value: production
       - key: PYTHONPATH
         value: .
       - key: DATABASE_URL
-        sync: false # Set in Render dashboard
+        sync: false # Configured in Render dashboard
       - key: GROQ_API_KEY
-        sync: false # Set in Render dashboard
+        sync: false # Configured in Render dashboard
       - key: GROQ_MODEL
         value: llama-3.3-70b-versatile
       - key: CORS_ORIGINS
         value: '["*"]'
 
-  # Next.js Frontend
+  # Next.js Frontend Service
   - type: web
     name: workforce-pulse-frontend
     env: node
     rootDir: frontend
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
+    plan: starter
     envVars:
       - key: NEXT_PUBLIC_API_BASE_URL
-        sync: false # Set in Render dashboard (e.g. https://workforce-pulse-backend.onrender.com/api)
+        sync: false # Configured in Render dashboard (e.g. https://workforce-pulse-backend.onrender.com)
