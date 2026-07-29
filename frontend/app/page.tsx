@@ -1,12 +1,94 @@
+'use client';
+
+import React from 'react';
+import { DashboardProvider, useDashboard } from '@/components/dashboard/DashboardContext';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import KpiCards from '@/components/dashboard/KpiCards';
+import TimeSinkBreakdown from '@/components/dashboard/TimeSinkBreakdown';
+import AutomationRanking from '@/components/dashboard/AutomationRanking';
+import WeeklyTrend from '@/components/dashboard/WeeklyTrend';
+import AnomalyCallouts from '@/components/dashboard/AnomalyCallouts';
+import LoadingSkeleton from '@/components/dashboard/LoadingSkeleton';
+import { AlertCircle, Terminal } from 'lucide-react';
+
+function DashboardContent() {
+  const { data, loading, error, refresh } = useDashboard();
+
+  if (error) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-lg p-8 shadow-sm text-center max-w-xl mx-auto my-12 space-y-5">
+        <div className="bg-rose-50 p-3 rounded-full text-rose-500 w-12 h-12 flex items-center justify-center mx-auto">
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="font-bold text-slate-800 text-lg">Connection Failed</h3>
+          <p className="text-sm font-semibold text-slate-500 px-4 leading-relaxed">
+            {error}
+          </p>
+        </div>
+        <div className="bg-slate-50 rounded border border-slate-100 p-4 font-mono text-[11px] text-slate-500 text-left flex items-start space-x-2">
+          <Terminal className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>
+            Check that the FastAPI backend server is running and accessible at: 
+            <br />
+            <code className="text-slate-800 font-bold">{process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'}</code>
+          </span>
+        </div>
+        <button
+          onClick={refresh}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2.5 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
+        >
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 1. Header Filters */}
+      <DashboardHeader />
+
+      {/* 2. Content Sections */}
+      {loading && !data ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          {/* 3. KPI Cards */}
+          <KpiCards />
+
+          {/* 4. Time sink & Automation Opportunities */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3">
+              <TimeSinkBreakdown />
+            </div>
+            <div className="lg:col-span-2">
+              <AutomationRanking />
+            </div>
+          </div>
+
+          {/* 5. Weekly Trend & Anomaly Callouts */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3">
+              <WeeklyTrend />
+            </div>
+            <div className="lg:col-span-2">
+              <AnomalyCallouts />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <h2 className="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
-        Step 1 scaffold ready
-      </h2>
-      <p className="mt-4 text-lg text-slate-600 max-w-xl mx-auto">
-        The Workforce Pulse monorepo is successfully initialized with a Next.js frontend and FastAPI backend baseline.
-      </p>
-    </div>
+    <DashboardProvider>
+      <DashboardLayout>
+        <DashboardContent />
+      </DashboardLayout>
+    </DashboardProvider>
   );
 }
